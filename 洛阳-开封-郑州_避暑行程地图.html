@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="2026 年 7 月洛阳—开封—郑州避暑、美食、夜游互动行程地图">
+<meta name="theme-color" content="#153448">
+<title>洛阳—开封—郑州｜避暑美食行程地图</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+:root {
+  --ink:#15232d; --muted:#687680; --paper:#fffdf9; --canvas:#f3f0e9;
+  --navy:#153448; --teal:#287271; --coral:#e76f51; --gold:#e9a23b;
+  --purple:#7656a6; --green:#4d7c56; --line:rgba(21,52,72,.12);
+  --shadow:0 10px 30px rgba(21,52,72,.09); --shadow-sm:0 3px 12px rgba(21,52,72,.07);
+  --r-sm:10px; --r:16px; --r-lg:24px; --safe-top:env(safe-area-inset-top,0px); --safe-right:env(safe-area-inset-right,0px); --safe-bottom:env(safe-area-inset-bottom,0px); --safe-left:env(safe-area-inset-left,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:var(--canvas);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font:inherit}
+#map{height:max(38vh,270px);min-height:270px;width:100%;position:sticky;top:0;z-index:100;background:#dfe7e7}
+.map-fallback{height:100%;display:grid;place-items:center;padding:24px;text-align:center;color:var(--muted);background:linear-gradient(135deg,#e8efec,#f5eee2)}
+.tabs{position:sticky;top:max(38vh,270px);z-index:99;display:flex;gap:7px;overflow-x:auto;padding:11px max(14px,var(--safe-right)) 11px max(14px,var(--safe-left));border-bottom:1px solid var(--line);background:rgba(255,253,249,.88);backdrop-filter:blur(20px) saturate(150%);scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;border:0;border-radius:999px;padding:8px 14px;background:#e9e5dd;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;transition:.2s ease}
+.tab:active{transform:scale(.96)}
+.tab.active{background:var(--navy);color:white;box-shadow:0 4px 14px rgba(21,52,72,.22)}
+.content{max-width:760px;margin:0 auto;padding:18px 15px calc(34px + var(--safe-bottom))}
+.hero{overflow:hidden;position:relative;border-radius:var(--r-lg);padding:26px 22px;color:#fff;background:linear-gradient(145deg,#153448 0%,#287271 65%,#d28d55 135%);box-shadow:var(--shadow);margin-bottom:14px}
+.hero:after{content:"";position:absolute;width:190px;height:190px;border:36px solid rgba(255,255,255,.08);border-radius:50%;right:-85px;top:-85px}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.78;margin-bottom:9px}
+.hero h1{font-size:29px;line-height:1.16;letter-spacing:-.025em;max-width:540px}
+.hero p{font-size:15px;opacity:.84;margin-top:10px;max-width:590px}
+.hero-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:15px}
+.hero-tag{font-size:12px;font-weight:700;padding:5px 9px;border:1px solid rgba(255,255,255,.2);border-radius:999px;background:rgba(255,255,255,.1)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:12px 0}
+.panel{background:var(--paper);border:1px solid rgba(21,52,72,.06);border-radius:var(--r);padding:15px;box-shadow:var(--shadow-sm)}
+.panel .kicker{font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);font-weight:800;margin-bottom:5px}
+.panel .value{font-size:15px;font-weight:750;line-height:1.42}
+.section-title{font-size:12px;color:var(--muted);font-weight:850;letter-spacing:.06em;text-transform:uppercase;margin:22px 3px 9px}
+.callout{border-radius:var(--r);padding:14px 15px;margin:10px 0;background:#fff6df;border:1px solid #f0d69b;color:#5e4820;font-size:13px;box-shadow:var(--shadow-sm)}
+.callout strong{color:#3f2f13}
+.callout.danger{background:#fff0ec;border-color:#f3b7a8;color:#6e3426}
+.callout.cool{background:#eef7f5;border-color:#b8dbd3;color:#285b57}
+.day-list{display:grid;gap:9px}
+.day-link{display:flex;align-items:center;gap:12px;background:var(--paper);border:1px solid rgba(21,52,72,.06);border-radius:var(--r);padding:13px 14px;box-shadow:var(--shadow-sm);cursor:pointer;text-align:left;width:100%}
+.day-link:active{transform:scale(.99)}
+.day-swatch{width:11px;height:40px;border-radius:999px;flex:0 0 auto}
+.day-copy{min-width:0;flex:1}
+.day-copy strong{display:block;font-size:15px}
+.day-copy span{display:block;color:var(--muted);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.day-arrow{color:#a0a9af;font-size:19px}
+.bar-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.bar-card{background:var(--paper);border-radius:var(--r);padding:13px;border:1px solid rgba(21,52,72,.06);box-shadow:var(--shadow-sm)}
+.bar-card strong{font-size:13px;display:block}.bar-card span{font-size:11px;color:var(--muted);display:block;margin-top:4px}
+.day-head{padding:5px 2px 12px}
+.day-head .date{font-size:12px;color:var(--muted);font-weight:800;letter-spacing:.04em}
+.day-head h2{font-size:25px;line-height:1.18;letter-spacing:-.02em;margin-top:4px}
+.day-head p{color:var(--muted);font-size:14px;margin-top:6px}
+.route{background:linear-gradient(135deg,#fffdf9,#f7f3eb);border:1px solid rgba(21,52,72,.08);border-radius:var(--r);padding:13px 15px;box-shadow:var(--shadow-sm);font-size:13px;color:var(--muted);margin-bottom:12px}
+.route strong{color:var(--ink);display:block;margin-bottom:4px}.route .path{line-height:1.65}
+.timeline{position:relative;padding-left:24px}
+.timeline:before{content:"";position:absolute;left:7px;top:20px;bottom:20px;width:1.5px;background:var(--line)}
+.tl{position:relative;margin-bottom:10px}
+.dot{position:absolute;left:-21px;top:20px;width:11px;height:11px;border-radius:50%;box-shadow:0 0 0 4px var(--canvas);z-index:1}
+.dot.food{background:var(--coral)}.dot.spot{background:#3978b8}.dot.hotel{background:var(--gold)}.dot.drink{background:var(--purple)}.dot.transport{background:#7f8d94}.dot.rest{background:var(--teal)}
+.card{background:var(--paper);border:1px solid rgba(21,52,72,.06);border-radius:var(--r);padding:14px 15px;box-shadow:var(--shadow-sm)}
+.card-top{display:flex;gap:10px;align-items:flex-start}.card-main{min-width:0;flex:1}
+.time{font-size:11px;font-weight:850;color:var(--muted);letter-spacing:.035em;text-transform:uppercase}
+.name{font-size:17px;font-weight:780;line-height:1.32;margin-top:2px;letter-spacing:-.01em}
+.desc{font-size:13px;color:var(--muted);margin-top:5px;line-height:1.55}
+.kind{flex:0 0 auto;display:grid;place-items:center;width:32px;height:32px;border-radius:10px;background:#f0ece4;font-size:16px}
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
+.chip{font-size:10px;font-weight:800;border-radius:999px;padding:3px 7px;background:#ece9e2;color:#677078;border:1px solid rgba(21,52,72,.05)}
+.chip.reserve{background:#eaf5ed;color:#356442}.chip.queue{background:#fff1e5;color:#9a4d24}.chip.risk{background:#fdebe8;color:#994333}.chip.cool{background:#e8f4f3;color:#2a6965}.chip.optional{background:#f1ecf8;color:#694b91}
+.links{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}
+.btn{display:inline-flex;align-items:center;gap:4px;border:0;border-radius:9px;padding:8px 11px;font-size:12px;font-weight:800;cursor:pointer}
+.btn.nav{background:var(--navy);color:#fff}.btn.xhs{background:#ff2442;color:#fff}.btn.dp{background:#f3a20d;color:#fff}.btn.reserve{background:#3f8a62;color:#fff}.btn.source{background:#e9e5dd;color:#4c5962}
+.more-btn{margin-top:10px;border:0;background:transparent;color:var(--teal);font-size:12px;font-weight:800;cursor:pointer;padding:2px 0}
+.details{display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);color:#56646e;font-size:12px;line-height:1.65}
+.details.open{display:block}
+.alt .card{background:#f9f7f2;border-style:dashed}.alt .dot{opacity:.65}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--muted);padding:4px 2px}.legend span{display:flex;align-items:center;gap:5px}.legend i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.footer{font-size:11px;color:var(--muted);line-height:1.6;padding:16px 4px 4px}
+.locate{width:38px;height:38px;border:0;border-radius:11px;background:rgba(255,255,255,.92);box-shadow:0 2px 10px rgba(0,0,0,.18);cursor:pointer;font-size:17px}
+.leaflet-control-zoom{border:0!important;box-shadow:0 3px 12px rgba(0,0,0,.14)!important}.leaflet-control-zoom a{border:0!important}.leaflet-popup-content-wrapper{border-radius:14px!important;box-shadow:var(--shadow)!important}.leaflet-popup-content{margin:12px 14px!important;font-family:inherit!important;font-size:13px!important;line-height:1.5!important}.popup-time{color:#7b878e;font-size:11px}.popup-link{display:inline-block;margin-top:5px;color:#126c73;font-weight:800}
+.leaflet-top{top:var(--safe-top)}
+.sheet-wrap{position:fixed;inset:0;z-index:9999;background:rgba(10,24,32,.38);backdrop-filter:blur(3px);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:.22s}
+.sheet-wrap.show{opacity:1;pointer-events:auto}.sheet{width:100%;max-width:440px;padding:0 10px calc(12px + var(--safe-bottom));transform:translateY(100%);transition:.25s cubic-bezier(.22,1,.36,1)}.sheet-wrap.show .sheet{transform:translateY(0)}
+.sheet-group{overflow:hidden;border-radius:16px;background:rgba(255,255,255,.94);backdrop-filter:blur(18px);margin-top:8px;box-shadow:var(--shadow)}
+.sheet-title{padding:13px;text-align:center;color:var(--muted);font-size:12px;border-bottom:1px solid var(--line)}
+.sheet-item{display:flex;justify-content:center;align-items:center;padding:15px;border-bottom:1px solid var(--line);font-size:16px;font-weight:700;color:#126c73}.sheet-item:last-child{border-bottom:0}.sheet-cancel{color:var(--ink)}
+@media(max-width:560px){.bar-grid{grid-template-columns:1fr}.hero h1{font-size:26px}.grid{grid-template-columns:1fr 1fr}}
+@media(min-height:800px){#map{min-height:300px}}
+@media(orientation:landscape) and (max-height:600px){#map{height:44vh;min-height:150px;max-height:190px;position:relative}.tabs{top:0}.content{padding-top:12px}}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="map" aria-label="互动行程地图"></div>
+<nav class="tabs" id="tabs" aria-label="按日期切换"></nav>
+<main class="content" id="content"></main>
+<div class="sheet-wrap" id="sheetWrap" role="dialog" aria-modal="true" aria-hidden="true" hidden inert>
+  <div class="sheet">
+    <div class="sheet-group" id="sheetOptions"></div>
+    <div class="sheet-group"><button class="sheet-item sheet-cancel" type="button" onclick="closeSheet()">取消</button></div>
+  </div>
+</div>
+<script>
+const HOTELS = [
+  {city:`洛阳市`, name:`伊水源酒店（洛阳丹尼斯大卫天地解放路店）`, lat:34.668835, lng:112.425534, keyword:`伊水源酒店 洛阳丹尼斯大卫天地 解放路`},
+  {city:`开封市`, name:`锦上酒店（开封鼓楼广场店）`, lat:34.7943368, lng:114.3507447, keyword:`锦上酒店 开封鼓楼广场店`}
+];
+
+const DAYS = [
+  {id:0,label:`总览`,color:`#153448`,locations:[]},
+  {
+    id:1,label:`7/24 洛阳`,date:`7 月 24 日 · 周五`,title:`西工小街错峰，夜里再看城门`,subtitle:`抵达日不赶景点；下午小份试吃，最热时段回酒店。`,color:`#e76f51`,hotelCity:`洛阳市`,
+    route:`酒店 → 西工小街两店（步行约百米） → 酒店/商场休息 → 应天门外观（可删） → 醇享酒匠（可选）`,
+    locations:[
+      {time:`抵达后—15:30`,name:`伊水源酒店 · 入住降温`,type:`hotel`,city:`洛阳市`,lat:34.668835,lng:112.425534,desc:`按实际到店顺延。若 16:30 后才入住，直接删除应天门，不压缩休息。`,chips:[`白天少走`,`行李落地`],amapKeyword:`伊水源酒店 洛阳丹尼斯大卫天地 解放路`},
+      {time:`15:40—16:30`,name:`小街天府`,type:`food`,city:`洛阳市`,lat:34.672960,lng:112.440045,desc:`担担面、脆皮糍粑、小米凉糕都点小份；把它当试吃，不当整顿正餐。`,chips:[`排队≤20分`,`口味两极`,`15点错峰`],detail:`近期小红书与公开点评反复出现“人多、排队、口味两极”的信号；也有攻略建议 14:00—16:00 去。若队伍明显超过 20 分钟，只买能快速出餐的一两样或直接跳过。平台当前展示 10:30—次日 05:30，出发前仍需复核。`,amapKeyword:`小街天府`,xhsKeyword:`洛阳 小街天府 排队`,dianpingKeyword:`洛阳 小街天府`,source:`https://gs.ctrip.com/html5/you/foods/fooddetail/2089244/15451327.html`},
+      {time:`16:35—17:15`,name:`小街熟食 · 锅贴原点`,type:`food`,city:`洛阳市`,lat:34.672394,lng:112.439430,desc:`少量分食锅贴、涮牛肚，配海碧；与小街天府相距约百米。`,chips:[`排队≤20分`,`营业待复核`],detail:`公开菜单能交叉验证锅贴、涮牛肚、特色浆面。门店营业时段不够稳定；若现场排队超过 20 分钟，就只保留上一站，不为锅贴硬等。`,amapKeyword:`小街熟食 西工小街44号`,xhsKeyword:`洛阳 小街锅贴 涮牛肚 海碧`,dianpingKeyword:`洛阳 小街熟食 锅贴`,source:`https://gs.ctrip.com/html5/you/foods/fooddetail/100058/4926402.html`},
+      {time:`17:30—19:45`,name:`酒店 / 丹尼斯大卫天地休息`,type:`rest`,city:`洛阳市`,lat:34.668835,lng:112.425534,desc:`吹空调、补水或午睡；这是当天最重要的避暑安排。`,chips:[`完整避暑`],amapKeyword:`丹尼斯大卫天地 洛阳`},
+      {time:`20:00—21:10`,name:`应天门南广场 · 只看外观`,type:`spot`,city:`洛阳市`,lat:34.676987,lng:112.454631,desc:`轻量夜景点；不强买票、不绕城墙，天气差或到店晚就删。`,chips:[`可选`,`夜间短走`],detail:`只在南广场看亮灯和建筑外观。若想临时入馆，先用官方/地图核对当天售检票截止；不要为了入馆排队。`,amapKeyword:`应天门南广场`,xhsKeyword:`洛阳 应天门 夜景 人流`},
+      {time:`21:30—22:40`,name:`醇享酒匠 Cocktail & Cigar`,type:`drink`,city:`洛阳市`,lat:34.673060,lng:112.415829,desc:`高层城市夜景；问“花园”或“黄瓜”特调，或另点无酒精花果香特调。`,chips:[`可选`,`一杯即走`,`19:30后`],detail:`近期公开内容提到花园、黄瓜两款特调以及另外的无酒精花果香饮品；平台当前展示 19:30—01:30。约距酒店 1 km，酒后打车。`,amapKeyword:`醇享酒匠 Cocktail Cigar 洛阳`,xhsKeyword:`洛阳 醇享酒匠 特调`,dianpingKeyword:`洛阳 醇享酒匠`,source:`https://hk.trip.com/restaurant/china/luoyang/detail/enjoy-bar-129884944/?locale=zh-HK`}
+    ]
+  },
+  {
+    id:2,label:`7/25 龙门`,date:`7 月 25 日 · 周六`,title:`午后休息，夜游龙门石窟`,subtitle:`用夜游换掉正午暴晒；只走西山主线，香山寺按体力决定。`,color:`#d28d55`,hotelCity:`洛阳市`,
+    route:`付记午餐 → 酒店午休 → 打车到西北服务区 → 电瓶车接驳 → 西山石窟 → 香山寺可删 → 打车返酒店`,
+    locations:[
+      {time:`12:10—13:00`,name:`付记老城糊涂面浆面条馆`,type:`food`,city:`洛阳市`,lat:34.674171,lng:112.425598,desc:`距酒店约 600 m；小份尝浆面条/糊涂面，午市当前到 14:00。`,chips:[`非网红小店`,`准时到`],detail:`平台当前展示 11:00—14:00、17:00—20:30。公开样本不多，反而更符合“不排很久”；但营业窗口窄，出发前地图复核。`,amapKeyword:`付记老城糊涂面浆面条馆 唐宫西路店`,xhsKeyword:`洛阳 付记 糊涂面 浆面条`,dianpingKeyword:`洛阳 付记糊涂面浆面条`,source:`https://gs.ctrip.com/html5/you/foods/fooddetail/198/7407648.html`},
+      {time:`13:10—15:30`,name:`酒店午休`,type:`rest`,city:`洛阳市`,lat:34.668835,lng:112.425534,desc:`补水、换防滑鞋；不在午后增加任何户外点。`,chips:[`避暑核心`],amapKeyword:`伊水源酒店 洛阳`},
+      {time:`15:50—20:50`,name:`龙门石窟夜游`,type:`spot`,city:`洛阳市`,lat:34.560379,lng:112.471873,desc:`16:40 前后到服务区休息；18:00 检票，西山石窟主线到 20:50。`,chips:[`需实名预约`,`夜游限定`,`雨天防滑`],detail:`当前夜游售票 17:30—19:30、检票 18:00—20:00、21:00 清场；只开放西山石窟和香山寺，东山、白园不开放。服务区到检票区可坐 10 元单程电瓶车，省约 20 分钟步行；洞窟栈道和台阶仍需自己走。腿累就删香山寺，雷电/强降雨则与 7/26 晚互换或取消。`,amapKeyword:`龙门石窟西北服务区`,xhsKeyword:`龙门石窟 夜游 2026 台阶`,reserve:`https://www.lmsk.cn/Pwxx_id_4.html`,source:`https://www.lmsk.cn/Pwxx_id_1.html`},
+      {time:`21:00 后`,name:`打车返回酒店`,type:`transport`,city:`洛阳市`,lat:34.668835,lng:112.425534,desc:`周末/雨天叫车留弹性；游船受水位与天气影响，不列为必做。`,chips:[`不追游船`],amapKeyword:`伊水源酒店 洛阳`}
+    ]
+  },
+  {
+    id:3,label:`7/26 洛邑`,date:`7 月 26 日 · 周日`,title:`一碗汤、一桌水席，夜走洛邑古城`,subtitle:`把吃饭卡在非峰值，白天完整回酒店休息。`,color:`#287271`,hotelCity:`洛阳市`,
+    route:`南关牛肉汤 → 酒店午休 → 纱厂路水席 → 洛邑古城 → 十字街找牡丹芳华（可删）`,
+    locations:[
+      {time:`12:10—13:05`,name:`河洛郑波·南关小碗牛肉汤（总店）`,type:`food`,city:`洛阳市`,lat:34.677475,lng:112.477257,desc:`牛肉汤 + 油旋/饼丝；可在同店补海碧或涮牛肚。`,chips:[`晚起友好`,`全天汤馆`,`排队≤20分`],detail:`平台当前展示 05:30—22:30，是最适合午起的洛阳汤馆。饭点可能慢或拼桌；若队伍明显超过 20 分钟，直接删掉或就近吃清淡简餐，不在原地继续耗。`,amapKeyword:`河洛郑波 南关小碗牛肉汤 总店`,xhsKeyword:`洛阳 南关小碗牛肉汤 总店`,dianpingKeyword:`洛阳 南关小碗牛肉汤`,source:`https://gs.ctrip.com/html5/you/foods/fooddetail/198/7412381.html`},
+      {time:`13:10—16:10`,name:`酒店午休`,type:`rest`,city:`洛阳市`,lat:34.668835,lng:112.425534,desc:`周日下午最高温时段完全留空。`,chips:[`避暑核心`],amapKeyword:`伊水源酒店 洛阳`},
+      {time:`16:30—18:00`,name:`老雒阳面馆·水席（纱厂路店）`,type:`food`,city:`洛阳市`,lat:34.675697,lng:112.423123,desc:`晚市刚开门去；两人点牡丹燕菜 + 连汤肉片/焦炸丸子二选一 + 主食。`,chips:[`水席主选`,`16:30错峰`],detail:`不点 24 道全席，避免酸辣胡椒味过度集中，也给晚间留体力。管记水席更网红且公开信号提示需早排，因此只作愿意排队时的备选，不放主线。`,amapKeyword:`老雒阳面馆 水席 纱厂路店`,xhsKeyword:`洛阳 老雒阳面馆 水席 纱厂路`,dianpingKeyword:`洛阳 老雒阳面馆 水席 纱厂路`,source:`https://www.trip.com/restaurant/china/luoyang/detail/restaurant-36657945/`},
+      {time:`19:30—21:10`,name:`洛邑古城 · 90 分钟短环线`,type:`spot`,city:`洛阳市`,lat:34.681580,lng:112.479540,desc:`文峰塔、水景和核心街区；人太密就沿外围拍照后撤。`,chips:[`免费预约`,`夜间短走`,`拥挤即撤`],detail:`暑期可能延时开放，但各公开口径存在差异；用当天官微为准。建议实名预约并带身份证。雷电时不在塔下、河岸和开阔区域停留。`,amapKeyword:`洛邑古城`,xhsKeyword:`洛邑古城 夜游 人流 2026`,reserve:`https://www.luoyangmudan.cn/t/965`,source:`https://www.luoyangmudan.cn/t/965`},
+      {time:`21:10—21:50`,name:`老城十字街 · 找牡丹芳华`,type:`food`,city:`洛阳市`,lat:34.682428,lng:112.472997,desc:`只核到“牡丹芳华奶茶”在十字街的街区线索；现场认招牌，找不到就不折返。`,chips:[`可选`,`门牌不稳定`],detail:`这不是已核实的固定门店坐标，地图点是十字街街区。不要为了一个不稳定摊位逆向走回去。胡辣汤、豆腐汤多为早餐档，本次也不单独牺牲睡眠；老君山早起日集合点附近若恰有营业，可外带二选一。`,amapKeyword:`洛阳老街十字街 牡丹芳华`,xhsKeyword:`洛阳 牡丹芳华 奶茶 十字街`,dianpingKeyword:`洛阳 牡丹芳华 奶茶`}
+    ]
+  },
+  {
+    id:4,label:`7/27 老君山`,date:`7 月 27 日 · 周一`,title:`双索道低体力版，唯一早起日`,subtitle:`先看天气再决定是否出发；双索道仍不等于无台阶。`,color:`#4d7c56`,hotelCity:`洛阳市`,
+    route:`06:15 酒店 → 票务中心/游客中心 → 景交 → 一级索道 → 二级索道 → 云景天路/十里画屏 → 金顶按体力 → 16:30 前下山 → 返洛`,
+    locations:[
+      {time:`06:15 左右`,name:`酒店集合出发`,type:`transport`,city:`洛阳市`,lat:34.668835,lng:112.425534,desc:`优先有资质的一日游/拼车；确认市区接送、门票、景交、两级索道包含范围。`,chips:[`唯一早起`,`身份证原件`],amapKeyword:`伊水源酒店 洛阳`},
+      {time:`09:00—10:30`,name:`老君山票务中心 / 双索道`,type:`spot`,city:`洛阳市`,lat:33.740809,lng:111.651912,desc:`核验实名预约后坐景交；一级索道和二级峰林索道都坐。`,chips:[`7/20开约`,`雷雨即取消`,`16:00停上行`],detail:`官方当前实行提前 7 天实名预约；7 月 27 日名额预计 7 月 20 日开放。一级索道夏秋上行 16:00 停止，徒步通道 15:30 后不再上行，恶劣天气会关闭。咨询 0379-66838888，救援 0379-66775268。`,amapKeyword:`老君山票务中心`,xhsKeyword:`老君山 双索道 低体力 雷雨`,reserve:`https://www.laojunshan.cn/nd.jsp?fromColId=2&id=2582`,source:`https://www.laojunshan.cn/nd.jsp?fromColId=2&id=2582`},
+      {time:`10:30—14:30`,name:`云景天路 / 十里画屏 → 金顶`,type:`spot`,city:`洛阳市`,lat:33.720310,lng:111.643530,desc:`双索道后仍有约 1.5—2 小时栈道和台阶；每 30—40 分钟休息。`,chips:[`仍有台阶`,`体感不适即折返`],detail:`想去金顶就必须接受实际步行；若胸闷、头晕、腿软或山上天气转差，在峰林索道上站看完云景天路后折返。不要用地图山峰坐标驾车，导航终点始终搜索票务中心/游客中心。`,amapKeyword:`老君山金顶道观群`,xhsKeyword:`老君山 十里画屏 金顶 台阶`},
+      {time:`14:30—16:30`,name:`双索道下山`,type:`transport`,city:`洛阳市`,lat:33.740809,lng:111.651912,desc:`不追 19:10 后亮灯；预计 17:00 集合返洛，20:00—21:00 回市区。`,chips:[`默认不等亮灯`,`留索道余量`],detail:`默认只执行 7 月 27 日。7 月 23—24 日若趋势明显恶化，只有在别日仍有官方余票、且能同步改掉龙门/洛邑预约时才整日互换；7 月 26 日晚若出现雷暴/大风预警、索道停运或步道关闭，任一项都直接取消。`,amapKeyword:`老君山景区出口`}
+    ]
+  },
+  {
+    id:5,label:`7/28 开封`,date:`7 月 28 日 · 周二`,title:`抵达开封，先用一桌完成三样小吃`,subtitle:`酒店在鼓楼旁；第一晚只走西司与老城短线。`,color:`#7656a6`,hotelCity:`开封市`,
+    route:`开封站 → 锦上酒店 → 黄家老店西司店 → 西司广场/包公湖短走 → 鼓楼/马道街 → 酒店`,
+    locations:[
+      {time:`17:00`,name:`开封站`,type:`transport`,city:`开封市`,lat:34.7725292,lng:114.3489859,desc:`出站后网约车到酒店；晚高峰按 25—35 分钟留量。`,chips:[`火车抵达`],amapKeyword:`开封站`},
+      {time:`17:40—18:20`,name:`锦上酒店 · 入住降温`,type:`hotel`,city:`开封市`,lat:34.7943368,lng:114.3507447,desc:`酒店紧邻鼓楼，首晚不做跨城式移动。`,chips:[`鼓楼旁`],amapKeyword:`锦上酒店 开封鼓楼广场店`},
+      {time:`18:30—19:50`,name:`黄家老店（西司店）`,type:`food`,city:`开封市`,lat:34.7964750,lng:114.3351704,desc:`一桌解决灌汤包、铁板炒凉粉、杏仁茶，避免夜市连续排三次。`,chips:[`三样合一`,`18:30错峰`,`排队≤20分`],detail:`坐席型餐厅比匿名夜市摊更稳；建议 18:30 前到或 20:00 后到。当前营业时段未从门店官方单独核实，出发前地图/电话复核：0371-25662988。`,amapKeyword:`黄家老店 西司店`,xhsKeyword:`开封 黄家老店 西司 灌汤包`,dianpingKeyword:`开封 黄家老店 西司店`,source:`https://you.ctrip.com/food/kaifeng165/11438620-dianping.html`},
+      {time:`20:00—21:20`,name:`西司广场夜市 → 包公湖短走`,type:`spot`,city:`开封市`,lat:34.7957400,lng:114.3330200,desc:`夜市不必全走；沿湖 800 m—1.2 km 即折返，只感受烟火气。`,chips:[`夜间短走`,`同品类邻摊替换`],detail:`若想补羊肉炕馍，只选明档现烙、前面 2—4 单的摊；排队超过 15 分钟就换邻摊或不吃。不要在夜市再完成一顿正餐。`,amapKeyword:`西司广场夜市`,xhsKeyword:`开封 西司夜市 少排队`},
+      {time:`21:40—22:40`,name:`鼓楼广场—马道街短环线`,type:`spot`,city:`开封市`,lat:34.7948417,lng:114.3500561,desc:`回到酒店旁再走；累了随时结束，不必逛完整条夜市。`,chips:[`酒店旁`,`可随时收尾`],amapKeyword:`开封鼓楼广场`,xhsKeyword:`开封 鼓楼 马道街 夜景`}
+    ]
+  },
+  {
+    id:6,label:`7/29 万岁山`,date:`7 月 29 日 · 周三`,title:`预约优先 14:00，避暑优先 16:00`,subtitle:`14:00 更利于约《三打》；若只把夜秀当核心，15:30—16:00 入园更符合避暑偏好。`,color:`#b94f6b`,hotelCity:`开封市`,
+    route:`书店街细米线 → 酒店拿装备 → 万岁山南门 → 入园核票 → 立刻约《三打》《打铁花》 → 遮阴小剧场 → 夜场 → 打车返酒店`,
+    locations:[
+      {time:`12:00—12:45`,name:`小楼米线（书店街店）`,type:`food`,city:`开封市`,lat:34.8001362,lng:114.3504281,desc:`鸡汤底细米线，离酒店近；若关门就换三胜街田记。`,chips:[`顺路主选`,`营业待复核`],detail:`地址北书店街 54 号，电话 13460695229。当前营业时间未可靠核实；出发前地图确认，关门就不等。`,amapKeyword:`小楼米线 书店街店`,xhsKeyword:`开封 小楼米线 书店街`,dianpingKeyword:`开封 小楼米线 书店街`,source:`https://you.ctrip.com/food/kaifeng165/62679153.html`},
+      {time:`14:00 / 16:00—23:00`,name:`万岁山武侠城`,type:`spot`,city:`开封市`,lat:34.8206500,lng:114.3442600,desc:`14:00 是预约优先版；若只重夜秀，15:30—16:00 入园更凉，但接受《三打》可能约满。`,chips:[`进园后预约`,`约满有退路`,`可提前退场`],detail:`当前票面开放 08:00—23:00、21:00 停止入园；节目单每天变化。核票后第一件事预约《三打祝家庄》和《沙场打铁花》。早到时固定在最近的有棚、有座区域，每 45—60 分钟坐下补水；有棚有座不等于有空调，仍闷热就原地休息或提前结束。任一大秀约满，就改看当日可预约夜场或就近街头演艺，不跨园追场；看完一场后可在 19:30 或 21:00 提前结束。`,amapKeyword:`万岁山武侠城 南门游客中心`,xhsKeyword:`万岁山武侠城 演出预约 打铁花 2026`,reserve:`https://wansuishan.com.cn/contact.html`,source:`https://you.ctrip.com/sight/kaifeng165/77323.html`},
+      {time:`—`,name:`三胜街田庆辉田记米线`,type:`food`,city:`开封市`,lat:34.8011844,lng:114.3502159,desc:`老开封口味标杆，但热门；小楼关门时才去，门口长队立刻放弃。`,chips:[`备选`,`热门店`,`排队≤15分`],detail:`地址三胜街 7 号营业房，平台当前展示 08:00—21:00；本地资料明确它热门，故不设为必须。`,amapKeyword:`三胜街田庆辉田记米线`,xhsKeyword:`开封 田记细米线 排队`,dianpingKeyword:`开封 田记米线 三胜街`,source:`https://us.trip.com/restaurant/china/kaifeng/detail/restaurant-164735/`}
+    ]
+  },
+  {
+    id:7,label:`7/30 开封`,date:`7 月 30 日 · 周四`,title:`四味菜、室内避暑与老城夜走`,subtitle:`博物馆可被酒店午休一键替换；不为早售罄小吃牺牲睡眠。`,color:`#3978b8`,hotelCity:`开封市`,
+    route:`李记四味菜 → 博物馆或酒店午休（二选一） → 邢家锅贴/羊肉炕馍 → 酒店休息 → 鼓楼—书店街短环线 → 理想三旬`,
+    locations:[
+      {time:`12:00—12:45`,name:`李记四味菜馆（书店街店）`,type:`food`,city:`开封市`,lat:34.7998535,lng:114.3503846,desc:`当前平台显示到 13:30；四味菜偏早餐，接受午时售罄风险。`,chips:[`排队≤15分`,`可能售罄`,`不硬等`],detail:`地址北书店街 59 号，电话 15194641302。若排队超过 15 分钟或已售罄，直接删掉，不跨城追赵家。`,amapKeyword:`李记四味菜馆 书店街店`,xhsKeyword:`开封 李记四味菜 书店街`,dianpingKeyword:`开封 李记四味菜`,source:`https://hk.trip.com/restaurant/china/kaifeng/detail/liji-siwei-restaurant-15800693/`},
+      {time:`13:40—15:30`,name:`开封市博物馆（可选）`,type:`spot`,city:`开封市`,lat:34.8044600,lng:114.2479800,desc:`全程打车，室内避暑；15:30 前离馆，不想跑远就直接回酒店午休。`,chips:[`可选`,`需预约`,`16:00停入馆`],detail:`周二至周日 09:00—17:00、16:00 停止入馆；2026-04-28 起使用官方预约小程序/官微入口。建议提前 1—3 天预约下午档。它离老城较远，因此被明确设为可替换，而不是硬任务。`,amapKeyword:`开封市博物馆 新馆`,reserve:`https://www.sina.cn/news/detail/5291280644969326.html`,source:`https://kf.bendibao.com/tour/20251225/23076.shtm`},
+      {time:`16:15—17:20`,name:`邢家锅贴老店（金明广场店）`,type:`food`,city:`开封市`,lat:34.8034059,lng:114.3027518,desc:`预留约 45 分钟从博物馆转场；点小份羊肉炕馍，可补杏仁茶或炒凉粉。`,chips:[`博物馆回程顺路`,`营业待复核`],detail:`平台菜单可见羊肉炕馍、传统灌汤包、杏仁茶和炒凉粉，但近期营业/排队信号不够强。出发前地图或电话复核：0371-23851333。`,amapKeyword:`邢家锅贴老店 金明广场店`,xhsKeyword:`开封 邢家锅贴 金明广场 羊肉炕馍`,dianpingKeyword:`开封 邢家锅贴 金明广场`,source:`https://you.ctrip.com/food/kaifeng165/151870249.html`},
+      {time:`19:45—21:10`,name:`鼓楼—马道街—北书店街—三胜街`,type:`spot`,city:`开封市`,lat:34.7989839,lng:114.3501600,desc:`总步行控制约 1.5—2 km；哪段太拥挤就折返。`,chips:[`夜间 citywalk`,`拥挤即折返`],amapKeyword:`开封北书店街`,xhsKeyword:`开封 鼓楼 书店街 夜游`},
+      {time:`21:20—22:40`,name:`理想三旬湖边酒馆·Cocktail`,type:`drink`,city:`开封市`,lat:34.8068927,lng:114.3495400,desc:`特色偏湖景、露台和驻唱；酒的特调评价分化，不把它包装成专业鸡尾酒朝圣。`,chips:[`可选`,`每日17:00后`,`一杯低酒精`],detail:`地址龙亭东路 22 号，电话 15736875993。公开页当前显示每日 17:00—03:00；想安静坐一楼/三楼，想听歌坐二楼，露台太热或有蚊就转室内。`,amapKeyword:`理想三旬湖边酒馆 Cocktail`,xhsKeyword:`开封 理想三旬 湖边酒馆`,dianpingKeyword:`开封 理想三旬湖边酒馆`,source:`https://maps.apple.com.cn/place?address=%E4%B8%AD%E5%9B%BD%E6%B2%B3%E5%8D%97%E7%9C%81%E5%BC%80%E5%B0%81%E5%B8%82%E9%BE%99%E4%BA%AD%E5%8C%BA%E9%BE%99%E4%BA%AD%E4%B8%9C%E8%B7%AF22%E5%8F%B7&coordinate=34.806097%2C114.355463&name=%E7%90%86%E6%83%B3%E4%B8%89%E6%97%AC%E6%B9%96%E8%BE%B9%E9%85%92%E9%A6%86%C2%B7Cocktail`},
+      {time:`—`,name:`张记仁香斋双麻火烧 · 当天搜索`,type:`food`,city:`开封市`,lat:null,lng:null,desc:`只能核到东大寺门食品街的旧线索，缺 2026 精确门牌/营业；显示营业且不排队才顺手买。`,chips:[`未核实坐标`,`偏早餐`,`不专程`],detail:`与午起习惯天然冲突。不要把旧攻略当成现行门店信息；若地图当天无结果，本次接受错过。`,amapKeyword:`张记仁香斋双麻火烧 开封`,xhsKeyword:`开封 张记仁香斋 双麻火烧`,dianpingKeyword:`开封 双麻火烧`},
+      {time:`—`,name:`老白烩面 · 待补原链接`,type:`food`,city:`开封市`,lat:null,lng:null,desc:`当前无法把店名、地址、仍营业三者闭环，可能是平台简称或店名已变；未放假坐标。`,chips:[`信息缺口`,`不编造`],detail:`如果有最初看到的短视频/小红书/点评分享链接或截图，可以再把准确门店补进地图。暂不拿“老海家”等其他店冒充。`,amapKeyword:`老白烩面 开封`,xhsKeyword:`开封 老白烩面`,dianpingKeyword:`开封 老白烩面`}
+    ]
+  },
+  {
+    id:8,label:`7/31 郑州`,date:`7 月 31 日 · 周五`,title:`三店美食短停，安全版 21:30 前回站`,subtitle:`返程车次未知，先把“21:30 离开市区”前移为“20:55 离开”；车票足够晚再延后。`,color:`#ee6c3d`,hotelCity:null,
+    route:`郑州站西广场寄存 → 地铁 1 号线到碧沙岗 → 周记米皮 → 打车到老城 → 小马炸鸡 → 老蔡记 → 蓉LOUNGE → 二七短走 → 地铁返站`,
+    locations:[
+      {time:`15:00—15:35`,name:`郑州站西广场 · 寄存行李`,type:`transport`,city:`郑州市`,lat:34.7476073,lng:113.6492783,desc:`优先西广场出站；第三方寄存须预约并复核实际入口，贵重物品随身。`,chips:[`先寄存`,`返程缓冲`],detail:`寄存页面当前显示西广场 E 口附近有 07:00—24:00 点位，但详细地址、余位和可能的施工绕行需下单后/当天确认。绝不拖箱完成美食路线。`,amapKeyword:`郑州火车站西广场`},
+      {time:`16:00—16:30`,name:`陕西周记·手工米皮老店`,type:`food`,city:`郑州市`,lat:34.7583023,lng:113.6154581,desc:`地铁 1 号线到碧沙岗；点小份手工米皮/两掺，给后两店留胃。`,chips:[`唯一离群点`,`非饭点`,`近期排队未知`],detail:`地址向荣街国棉四厂家属院，平台当前展示 09:00—21:00。它是全程唯一向西绕行点，所以必须先去；若 16:00 仍未离开郑州站，第一项就删它。`,amapKeyword:`陕西周记 手工米皮老店 工人路店`,xhsKeyword:`郑州 陕西周记 手工米皮`,dianpingKeyword:`郑州 周记手工米皮 工人路`,source:`https://gs.ctrip.com/html5/you/foods/fooddetail/2296/16003173.html`},
+      {time:`17:10—17:35`,name:`清真小马炸鸡（法院西街店）`,type:`food`,city:`郑州市`,lat:34.7538897,lng:113.6665424,desc:`小份蒜香鸡腿/蒜香炸鸡，要求现炸；制作等待也算进 20 分钟上限。`,chips:[`蒜香口味`,`17:40前离开`,`排队≤20分`],detail:`平台当前展示 09:30—21:00，电话 18530038282。现炸需要等待，但没有可信的实时分钟数；全部等待计入 20 分钟上限，别把它当整顿正餐。`,amapKeyword:`清真小马炸鸡 法院西街店`,xhsKeyword:`郑州 清真小马炸鸡 法院西街 蒜香`,dianpingKeyword:`郑州 清真小马炸鸡 法院西街`,source:`https://us.trip.com/restaurant/china/zhengzhou/detail/restaurant-11557138/`},
+      {time:`17:50—18:35`,name:`老蔡记蒸饺`,type:`food`,city:`郑州市`,lat:34.7521132,lng:113.6615507,desc:`“老菜记”应为老字号“老蔡记”；从小马步行约 8—12 分钟。`,chips:[`名称已纠正`,`饭点高风险`,`排队≤20分`],detail:`携程当前 POI 写彩虹路 3 号，商务部历史资料写德化街 2 号；导航以当天高德门店 POI 为准。赶在 18:00—19:00 主峰前，等位超过 20 分钟就外带或放弃。`,amapKeyword:`老蔡记 德化美食街店`,xhsKeyword:`郑州 老蔡记 德化街 蒸饺`,dianpingKeyword:`郑州 老蔡记 德化街`,source:`https://lzhbwg.mofcom.gov.cn/edi_ecms_web_front/thb/detail/65226b2823624371bf4cc1e9dbee98be`},
+      {time:`19:00—20:00`,name:`蓉LOUNGE`,type:`drink`,city:`郑州市`,lat:34.7535091,lng:113.6637339,desc:`问一杯茶/水果底、清爽、低酒精、带一点本土风味的特调，20:00 前结账。`,chips:[`19:00开门`,`吧台短停`,`不续杯`],detail:`地址北下街派出所向南约 100 m 路东，电话 15203835217。公开评论提到可按口味特调、新鲜水果与茶底；未核到现行“郑州限定”酒名，所以不编酒单。`,amapKeyword:`蓉LOUNGE威士忌鸡尾酒FLOWER酒吧`,xhsKeyword:`郑州 蓉LOUNGE`,dianpingKeyword:`郑州 蓉LOUNGE`,source:`https://tw.trip.com/restaurant/china/zhengzhou/detail/rong-lounge-97010390/`},
+      {time:`20:00—20:55`,name:`二七广场—德化街短走`,type:`spot`,city:`郑州市`,lat:34.7528493,lng:113.6598067,desc:`只看二七塔夜景、走一小段德化街；不折返找更多店。`,chips:[`夜间短走`,`20:55返站`],amapKeyword:`二七广场`,xhsKeyword:`郑州 二七广场 夜景`},
+      {time:`20:55—21:25`,name:`地铁返郑州站、取行李`,type:`transport`,city:`郑州市`,lat:34.7476073,lng:113.6492783,desc:`安全版建议 21:30 已在站内；这比原设想的“21:30 才离开市区”更保守。`,chips:[`安全线`,`以车票倒推`],detail:`只有确认列车明显晚于 22:30、行李已取且进站余量充足，才把离开二七延后到 21:30。若返程列车较早，继续前移或删除清吧；若 20:30 还在酒吧，直接删 citywalk。`,amapKeyword:`郑州火车站西广场`}
+    ]
+  }
+];
+
+const emoji={food:`🍜`,spot:`◉`,hotel:`⌂`,drink:`◒`,transport:`↗`,rest:`☁`};
+const dotClass={food:`food`,spot:`spot`,hotel:`hotel`,drink:`drink`,transport:`transport`,rest:`rest`};
+const LOCS={}; DAYS.forEach(d=>d.locations.forEach((l,i)=>LOCS[`${d.id}-${i}`]=l));
+
+function esc(s){return String(s??``).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function amapUrl(loc){return `https://uri.amap.com/search?keyword=${encodeURIComponent(loc.amapKeyword||loc.name)}&city=${encodeURIComponent(loc.city||``)}&callnative=1`;}
+function xhsUrl(loc){return `https://www.xiaohongshu.com/search_result?keyword=${encodeURIComponent(loc.xhsKeyword||loc.name)}&source=web_explore_feed`;}
+function dpUrl(loc){return `https://m.dianping.com/searchshop?keyword=${encodeURIComponent(loc.dianpingKeyword||loc.name)}`;}
+function safeUrl(url){try{const parsed=new URL(url);return /^https?:$/.test(parsed.protocol)?parsed.href:``;}catch{return``;}}
+
+let map=null, layers=[];
+function markerIcon(color,type,small=false){const size=small?22:30;return L.divIcon({className:``,html:`<div style="width:${size}px;height:${size}px;border-radius:50%;background:${color};border:2.5px solid white;display:grid;place-items:center;color:white;font-size:${small?10:13}px;font-weight:900;box-shadow:0 3px 10px rgba(0,0,0,.22)">${emoji[type]||`•`}</div>`,iconSize:[size,size],iconAnchor:[size/2,size/2],popupAnchor:[0,-size/2]});}
+function initMap(){
+  if(!window.L){document.getElementById(`map`).innerHTML=`<div class="map-fallback"><div><strong>地图组件暂未载入</strong><br><small>行程卡片和导航按钮仍可正常使用；联网后刷新即可显示地图。</small></div></div>`;return;}
+  map=L.map(`map`,{center:[34.73,113.25],zoom:8,zoomControl:false,attributionControl:true});
+  L.control.zoom({position:`topright`}).addTo(map);
+  L.tileLayer(`https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png`,{maxZoom:19,attribution:`&copy; OpenStreetMap &copy; CARTO`}).addTo(map);
+  const Locate=L.Control.extend({options:{position:`bottomright`},onAdd(){const b=L.DomUtil.create(`button`,`locate`);b.type=`button`;b.title=`定位我的位置`;b.innerHTML=`⌖`;L.DomEvent.disableClickPropagation(b);b.onclick=()=>map.locate({setView:true,maxZoom:15});return b;}});new Locate().addTo(map);
+  map.on(`locationfound`,e=>{const m=L.circleMarker(e.latlng,{radius:7,color:`#fff`,weight:3,fillColor:`#1677ff`,fillOpacity:1}).addTo(map).bindPopup(`我的位置`);layers.push(m);});
+}
+function clearLayers(){if(!map)return;layers.forEach(x=>map.removeLayer(x));layers=[];}
+function coordKey(loc){return loc.lat==null||loc.lng==null?``:`${Number(loc.lat).toFixed(6)},${Number(loc.lng).toFixed(6)}`;}
+function grouped(items){const groups=new Map();items.forEach(item=>{const key=coordKey(item.loc);if(!key)return;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(item);});return [...groups.values()];}
+function addGroupedMarker(items,small=false){
+  if(!map||!items.length)return null;
+  const representative=items.find(x=>x.loc.type!==`rest`)||items[0],loc=representative.loc;
+  const unique=[];const seen=new Set();items.forEach(item=>{const key=`${item.loc.name}|${item.label}`;if(!seen.has(key)){seen.add(key);unique.push(item);}});
+  const rows=unique.map(item=>`<div style="padding:4px 0"><b>${esc(item.loc.name)}</b><br><span class="popup-time">${esc(item.label||item.loc.time||``)}</span><br>${esc(item.loc.desc||``)}<br><a class="popup-link" href="${esc(amapUrl(item.loc))}" target="_blank" rel="noopener">高德搜索 →</a></div>`).join(`<hr style="border:0;border-top:1px solid #e7e3dc;margin:4px 0">`);
+  const m=L.marker([loc.lat,loc.lng],{icon:markerIcon(representative.color,loc.type,small)}).addTo(map).bindPopup(rows);layers.push(m);return m;
+}
+function showMap(id){
+  if(!map)return;clearLayers();const pts=[],items=[];
+  if(id===0){
+    HOTELS.forEach(h=>items.push({loc:{...h,type:`hotel`,amapKeyword:h.keyword},color:`#e9a23b`,label:`${h.city} · 住宿`}));
+    DAYS.slice(1).forEach(d=>d.locations.filter(l=>l.time!==`—`&&l.lat!=null).forEach(l=>items.push({loc:l,color:d.color,label:`${d.label} · ${l.time}`})));
+  } else {
+    const d=DAYS.find(x=>x.id===id);if(!d)return;
+    if(d.hotelCity)HOTELS.filter(h=>h.city===d.hotelCity).forEach(h=>items.push({loc:{...h,type:`hotel`,amapKeyword:h.keyword},color:`#e9a23b`,label:`住宿`}));
+    const route=[];let lastRouteKey=``;d.locations.forEach(l=>{if(l.lat==null)return;items.push({loc:l,color:d.color,label:l.time});const key=coordKey(l);if(l.time!==`—`&&l.type!==`rest`&&key!==lastRouteKey){route.push([l.lat,l.lng]);lastRouteKey=key;}});
+    if(route.length>1){const p=L.polyline(route,{color:d.color,weight:3,opacity:.48,dashArray:`7,7`}).addTo(map);layers.push(p);}
+  }
+  grouped(items).forEach(group=>{addGroupedMarker(group,id===0);const loc=group[0].loc;pts.push([loc.lat,loc.lng]);});
+  if(pts.length===1)map.setView(pts[0],14);else if(pts.length)map.fitBounds(pts,{padding:[35,35],maxZoom:14});
+}
+
+function chipClass(c){if(/预约|实名/.test(c))return`reserve`;if(/排队|售罄|热门/.test(c))return`queue`;if(/雷雨|风险|停|缺口|不编造|未核实/.test(c))return`risk`;if(/避暑|降温|午休|少走/.test(c))return`cool`;if(/可选|备选|可删|不专程/.test(c))return`optional`;return``;}
+function card(loc,dayId,index){
+  const key=`${dayId}-${index}`,alt=loc.time===`—`;
+  const chips=(loc.chips||[]).map(c=>`<span class="chip ${chipClass(c)}">${esc(c)}</span>`).join(``);
+  let links=`<button class="btn nav" type="button" onclick="openSheet('${key}')">⌁ 导航</button>`;
+  if(loc.xhsKeyword)links+=`<a class="btn xhs" href="${esc(xhsUrl(loc))}" target="_blank" rel="noopener">小红书</a>`;
+  if(loc.dianpingKeyword||loc.type===`food`||loc.type===`drink`)links+=`<a class="btn dp" href="${esc(dpUrl(loc))}" target="_blank" rel="noopener">大众点评</a>`;
+  const reserveUrl=safeUrl(loc.reserve);if(reserveUrl)links+=`<a class="btn reserve" href="${esc(reserveUrl)}" target="_blank" rel="noopener">预约/规则</a>`;
+  const sourceUrl=safeUrl(loc.source);if(sourceUrl&&sourceUrl!==reserveUrl)links+=`<a class="btn source" href="${esc(sourceUrl)}" target="_blank" rel="noopener">核验来源</a>`;
+  const details=loc.detail?`<button class="more-btn" type="button" onclick="toggleDetail(event,'detail-${key}')">展开执行细节 ↓</button><div class="details" id="detail-${key}">${esc(loc.detail)}</div>`:``;
+  return `<div class="tl ${alt?`alt`:``}"><div class="dot ${dotClass[loc.type]||`transport`}"></div><article class="card"><div class="card-top"><div class="card-main"><div class="time">${alt?`备选 / 待核验`:esc(loc.time)}</div><div class="name">${esc(loc.name)}</div><div class="desc">${esc(loc.desc)}</div></div><div class="kind">${emoji[loc.type]||`•`}</div></div>${chips?`<div class="chips">${chips}</div>`:``}<div class="links">${links}</div>${details}</article></div>`;
+}
+function dayView(d){
+  const main=d.locations.filter(l=>l.time!==`—`),alt=d.locations.filter(l=>l.time===`—`);
+  let h=`<header class="day-head"><div class="date">${esc(d.date)}</div><h2>${esc(d.title)}</h2><p>${esc(d.subtitle)}</p></header><div class="route"><strong>今天的动线</strong><div class="path">${esc(d.route)}</div></div><div class="section-title">按时间执行</div><div class="timeline">`;
+  main.forEach(l=>h+=card(l,d.id,d.locations.indexOf(l)));h+=`</div>`;
+  if(alt.length){h+=`<div class="section-title">只在条件满足时启用</div><div class="timeline">`;alt.forEach(l=>h+=card(l,d.id,d.locations.indexOf(l)));h+=`</div>`;}
+  h+=`<div class="footer">坐标用于 Leaflet 行程示意；中国地图坐标体系存在偏移，实际导航按钮始终按中文地点关键词在高德中搜索。营业、演出、天气和排队均需临近复核。</div>`;return h;
+}
+function overview(){
+  return `<section class="hero"><div class="eyebrow">2026 · 中原暑夜线</div><h1>洛阳—开封—郑州<br>避暑、美食与夜游地图</h1><p>7 月 24—31 日 · 中午起步版。白天空调与打车，夜里再走；老君山是唯一早起日。</p><div class="hero-tags"><span class="hero-tag">排队 15—20 分钟封顶</span><span class="hero-tag">雷雨可删</span><span class="hero-tag">三城各一间清吧</span></div></section>
+  <div class="grid"><div class="panel"><div class="kicker">住宿</div><div class="value">洛阳 · 伊水源酒店<br>开封 · 锦上酒店</div></div><div class="panel"><div class="kicker">郑州短停</div><div class="value">15:00 抵站<br>21:30 前回站</div></div><div class="panel"><div class="kicker">唯一早起</div><div class="value">7/27 老君山<br>06:15 左右出发</div></div><div class="panel"><div class="kicker">默认交通</div><div class="value">市内地铁/网约车<br>景区接驳优先</div></div></div>
+  <div class="callout danger"><strong>今天就要处理：</strong>老君山 7 月 27 日名额预计 7 月 20 日开放，以官方购票页实际放号为准；龙门夜游、洛邑古城、万岁山门票也尽早完成。万岁山两场大秀必须当天先核票入园，再预约。</div>
+  <div class="callout cool"><strong>天气开关：</strong>截至 7 月 19 日，官方中期趋势显示高温、有雨；雷暴风险以短临预警和雷达为准。老君山默认只执行 7 月 27 日，7 月 26 日晚若有雷暴/大风预警、索道停运或步道关闭，任一项都直接取消。</div>
+  <div class="callout"><strong>不排队策略：</strong>小街天府只在 15 点档小份试吃；开封夜市同品类邻摊替换；老蔡记等位超 20 分钟即外带或放弃。老白烩面、双麻火烧、牡丹芳华无法核到稳定现行门牌的部分，地图明确标了信息边界。</div>
+  <div class="section-title">8 天总览</div><div class="day-list">${DAYS.slice(1).map(d=>`<button class="day-link" type="button" onclick="go(${d.id})"><span class="day-swatch" style="background:${d.color}"></span><span class="day-copy"><strong>${esc(d.label)} · ${esc(d.title)}</strong><span>${esc(d.route)}</span></span><span class="day-arrow">›</span></button>`).join(``)}</div>
+  <div class="section-title">每城一间夜生活候选</div><div class="bar-grid"><div class="bar-card"><strong>洛阳 · 醇享酒匠</strong><span>高层景观；花园/黄瓜特调信号</span></div><div class="bar-card"><strong>开封 · 理想三旬</strong><span>湖景、露台、驻唱优先于酒单</span></div><div class="bar-card"><strong>郑州 · 蓉LOUNGE</strong><span>茶果底定制特调；赶车只喝一杯</span></div></div>
+  <div class="section-title">主动删减</div><div class="panel"><div class="value" style="font-size:13px;font-weight:650">不加入白马寺、清明上河园、开封府等新大景点；龙门夜游放弃东山/白园，老君山不等亮灯，万岁山不追全节目单。开封博物馆可以被酒店午休直接替换。</div></div>
+  <div class="section-title">图例</div><div class="legend"><span><i style="background:var(--coral)"></i>餐饮</span><span><i style="background:#3978b8"></i>景点</span><span><i style="background:var(--purple)"></i>酒吧</span><span><i style="background:var(--gold)"></i>酒店</span><span><i style="background:var(--teal)"></i>休息</span></div>
+  <div class="footer">研究与坐标核验截至 2026-07-19。地图点为 WGS84 示意；导航使用中文 POI 搜索，避免坐标系偏移。所有第三方营业时间和排队信号均需出发前 24—48 小时复核。</div>`;
+}
+
+let current=0;
+const tabs=document.getElementById(`tabs`),content=document.getElementById(`content`);
+DAYS.forEach(d=>{const b=document.createElement(`button`);b.type=`button`;b.className=`tab${d.id===0?` active`:``}`;b.dataset.id=d.id;b.textContent=d.label;tabs.appendChild(b);});
+function go(id){current=id;tabs.querySelectorAll(`.tab`).forEach(t=>t.classList.toggle(`active`,Number(t.dataset.id)===id));const d=DAYS.find(x=>x.id===id);content.innerHTML=id===0?overview():dayView(d);showMap(id);window.scrollTo({top:document.getElementById(`map`).offsetTop,behavior:`smooth`});const active=tabs.querySelector(`[data-id="${id}"]`);if(active)active.scrollIntoView({behavior:`smooth`,inline:`center`,block:`nearest`});}
+tabs.addEventListener(`click`,e=>{const b=e.target.closest(`.tab`);if(b)go(Number(b.dataset.id));});
+function toggleDetail(e,id){e.stopPropagation();const el=document.getElementById(id);if(!el)return;el.classList.toggle(`open`);e.currentTarget.textContent=el.classList.contains(`open`)?`收起执行细节 ↑`:`展开执行细节 ↓`;}
+
+let sheetReturnFocus=null,sheetHideTimer=null;
+function setBackgroundInert(on){[`map`,`tabs`,`content`].forEach(id=>{const el=document.getElementById(id);if(!el)return;if(on)el.setAttribute(`inert`,``);else el.removeAttribute(`inert`);});}
+function openSheet(key){
+  const loc=LOCS[key];if(!loc)return;
+  const query=loc.amapKeyword||`${loc.name} ${loc.city||``}`.trim();
+  const apple=loc.lat!=null?`https://maps.apple.com/?q=${encodeURIComponent(query)}&ll=${loc.lat},${loc.lng}`:`https://maps.apple.com/?q=${encodeURIComponent(query)}`;
+  const osm=loc.lat!=null?`https://www.openstreetmap.org/?mlat=${loc.lat}&mlon=${loc.lng}#map=16/${loc.lat}/${loc.lng}`:``;
+  const options=document.getElementById(`sheetOptions`);options.innerHTML=`<div class="sheet-title">${esc(loc.name)}</div><a class="sheet-item" href="${esc(amapUrl(loc))}" target="_blank" rel="noopener">高德地图 · 按中文地点搜索</a><a class="sheet-item" href="${esc(apple)}" target="_blank" rel="noopener">Apple 地图</a>${osm?`<a class="sheet-item" href="${esc(osm)}" target="_blank" rel="noopener">OpenStreetMap 坐标</a>`:``}`;
+  const w=document.getElementById(`sheetWrap`);if(sheetHideTimer)clearTimeout(sheetHideTimer);sheetReturnFocus=document.activeElement;w.hidden=false;w.removeAttribute(`inert`);w.setAttribute(`aria-hidden`,`false`);setBackgroundInert(true);document.body.style.overflow=`hidden`;requestAnimationFrame(()=>w.classList.add(`show`));setTimeout(()=>options.querySelector(`.sheet-item`)?.focus(),40);
+}
+function closeSheet(){
+  const w=document.getElementById(`sheetWrap`);w.classList.remove(`show`);w.setAttribute(`aria-hidden`,`true`);setBackgroundInert(false);document.body.style.overflow=``;sheetHideTimer=setTimeout(()=>{w.hidden=true;w.setAttribute(`inert`,``);},230);if(sheetReturnFocus&&typeof sheetReturnFocus.focus===`function`)sheetReturnFocus.focus();sheetReturnFocus=null;
+}
+document.getElementById(`sheetWrap`).addEventListener(`click`,e=>{if(e.target.id===`sheetWrap`)closeSheet();});
+document.addEventListener(`keydown`,e=>{if(e.key===`Escape`)closeSheet();});
+
+initMap();go(0);
+</script>
+</body>
+</html>
