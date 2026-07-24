@@ -18,7 +18,7 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:var(--canvas);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:var(--canvas);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
 button{font:inherit}
 #map{height:max(38vh,270px);min-height:270px;width:100%;position:sticky;top:0;z-index:100;background:#dfe7e7}
@@ -28,7 +28,7 @@ button{font:inherit}
 .tab{flex:0 0 auto;border:0;border-radius:999px;padding:8px 14px;background:#e9e5dd;color:var(--muted);font-size:13px;font-weight:700;cursor:pointer;transition:.2s ease}
 .tab:active{transform:scale(.96)}
 .tab.active{background:var(--navy);color:white;box-shadow:0 4px 14px rgba(21,52,72,.22)}
-.content{max-width:760px;margin:0 auto;padding:18px 15px calc(34px + var(--safe-bottom))}
+.content{width:100%;min-width:0;max-width:760px;margin:0 auto;padding:18px 15px calc(34px + var(--safe-bottom))}
 .hero{overflow:hidden;position:relative;border-radius:var(--r-lg);padding:26px 22px;color:#fff;background:linear-gradient(145deg,#153448 0%,#287271 65%,#d28d55 135%);box-shadow:var(--shadow);margin-bottom:14px}
 .hero:after{content:"";position:absolute;width:190px;height:190px;border:36px solid rgba(255,255,255,.08);border-radius:50%;right:-85px;top:-85px}
 .eyebrow{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.78;margin-bottom:9px}
@@ -45,14 +45,14 @@ button{font:inherit}
 .callout strong{color:#3f2f13}
 .callout.danger{background:#fff0ec;border-color:#f3b7a8;color:#6e3426}
 .callout.cool{background:#eef7f5;border-color:#b8dbd3;color:#285b57}
-.day-list{display:grid;gap:9px}
-.day-link{display:flex;align-items:center;gap:12px;background:var(--paper);border:1px solid rgba(21,52,72,.06);border-radius:var(--r);padding:13px 14px;box-shadow:var(--shadow-sm);cursor:pointer;text-align:left;width:100%}
+.day-list{display:grid;gap:9px;min-width:0;max-width:100%}
+.day-link{display:flex;align-items:center;gap:12px;min-width:0;max-width:100%;overflow:hidden;background:var(--paper);border:1px solid rgba(21,52,72,.06);border-radius:var(--r);padding:13px 14px;box-shadow:var(--shadow-sm);cursor:pointer;text-align:left;width:100%}
 .day-link:active{transform:scale(.99)}
 .day-swatch{width:11px;height:40px;border-radius:999px;flex:0 0 auto}
 .day-copy{min-width:0;flex:1}
-.day-copy strong{display:block;font-size:15px}
+.day-copy strong{display:block;font-size:15px;overflow-wrap:anywhere}
 .day-copy span{display:block;color:var(--muted);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.day-arrow{color:#a0a9af;font-size:19px}
+.day-arrow{flex:0 0 auto;color:#a0a9af;font-size:19px}
 .bar-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
 .bar-card{background:var(--paper);border-radius:var(--r);padding:13px;border:1px solid rgba(21,52,72,.06);box-shadow:var(--shadow-sm)}
 .bar-card strong{font-size:13px;display:block}.bar-card span{font-size:11px;color:var(--muted);display:block;margin-top:4px}
@@ -93,7 +93,8 @@ button{font:inherit}
 .sheet-group{overflow:hidden;border-radius:16px;background:rgba(255,255,255,.94);backdrop-filter:blur(18px);margin-top:8px;box-shadow:var(--shadow)}
 .sheet-title{padding:13px;text-align:center;color:var(--muted);font-size:12px;border-bottom:1px solid var(--line)}
 .sheet-item{display:flex;justify-content:center;align-items:center;padding:15px;border-bottom:1px solid var(--line);font-size:16px;font-weight:700;color:#126c73}.sheet-item:last-child{border-bottom:0}.sheet-cancel{color:var(--ink)}
-@media(max-width:560px){.bar-grid{grid-template-columns:1fr}.hero h1{font-size:26px}.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.bar-grid{grid-template-columns:1fr}.hero h1{font-size:26px}.day-copy span{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;line-height:1.5}.day-link{align-items:flex-start}.day-arrow{margin-top:8px}}
+@media(max-width:390px){.grid{grid-template-columns:1fr}.hero{padding:23px 18px}.content{padding-left:12px;padding-right:12px}}
 @media(min-height:800px){#map{min-height:300px}}
 @media(orientation:landscape) and (max-height:600px){#map{height:44vh;min-height:150px;max-height:190px;position:relative}.tabs{top:0}.content{padding-top:12px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
@@ -118,46 +119,48 @@ const HOTELS = [
 const DAYS = [
   {id:0,label:`总览`,color:`#153448`,locations:[]},
   {
-    id:1,label:`7/24 洛阳`,date:`7 月 24 日 · 周五`,title:`西工小街错峰，夜里再看城门`,subtitle:`抵达日不赶景点；下午小份试吃，最热时段回酒店。`,color:`#e76f51`,hotelCity:`洛阳市`,
-    route:`酒店 → 西工小街两店（步行约百米） → 酒店/商场休息 → 应天门外观（可删） → 醇享酒匠（可选）`,
+    id:1,label:`7/24 洛阳`,date:`7 月 24 日 · 周五`,title:`西工小街错峰，商场避暑后喝一杯`,subtitle:`办理入住后只出门一次；最热时段留在丹尼斯，不再折返酒店。`,color:`#e76f51`,hotelCity:`洛阳市`,
+    route:`酒店办入住 → 西工小街两店（步行约百米） → 丹尼斯大卫天地 → 醇享酒匠（可选） → 行程结束返酒店`,
     locations:[
-      {time:`抵达后—15:30`,name:`伊水源酒店 · 入住降温`,type:`hotel`,city:`洛阳市`,lat:34.668835,lng:112.425534,desc:`按实际到店顺延。若 16:30 后才入住，直接删除应天门，不压缩休息。`,chips:[`白天少走`,`行李落地`],amapKeyword:`伊水源酒店 洛阳丹尼斯大卫天地 解放路`},
+      {time:`抵达后—15:30`,name:`伊水源酒店 · 办理入住`,type:`hotel`,city:`洛阳市`,lat:34.668835,lng:112.425534,desc:`行李落地、补水并一次性带齐防晒和充电宝；此后直到当晚结束都不回酒店。`,chips:[`只出门一次`,`行李落地`],amapKeyword:`伊水源酒店 洛阳丹尼斯大卫天地 解放路`},
       {time:`15:40—16:30`,name:`小街天府`,type:`food`,city:`洛阳市`,lat:34.672960,lng:112.440045,desc:`担担面、脆皮糍粑、小米凉糕都点小份；把它当试吃，不当整顿正餐。`,chips:[`排队≤20分`,`口味两极`,`15点错峰`],detail:`近期小红书与公开点评反复出现“人多、排队、口味两极”的信号；也有攻略建议 14:00—16:00 去。若队伍明显超过 20 分钟，只买能快速出餐的一两样或直接跳过。平台当前展示 10:30—次日 05:30，出发前仍需复核。`,amapKeyword:`小街天府`,xhsKeyword:`洛阳 小街天府 排队`,dianpingKeyword:`洛阳 小街天府`,source:`https://gs.ctrip.com/html5/you/foods/fooddetail/2089244/15451327.html`},
       {time:`16:35—17:15`,name:`小街熟食 · 锅贴原点`,type:`food`,city:`洛阳市`,lat:34.672394,lng:112.439430,desc:`少量分食锅贴、涮牛肚，配海碧；与小街天府相距约百米。`,chips:[`排队≤20分`,`营业待复核`],detail:`公开菜单能交叉验证锅贴、涮牛肚、特色浆面。门店营业时段不够稳定；若现场排队超过 20 分钟，就只保留上一站，不为锅贴硬等。`,amapKeyword:`小街熟食 西工小街44号`,xhsKeyword:`洛阳 小街锅贴 涮牛肚 海碧`,dianpingKeyword:`洛阳 小街熟食 锅贴`,source:`https://gs.ctrip.com/html5/you/foods/fooddetail/100058/4926402.html`},
-      {time:`17:30—19:45`,name:`酒店 / 丹尼斯大卫天地休息`,type:`rest`,city:`洛阳市`,lat:34.668835,lng:112.425534,desc:`吹空调、补水或午睡；这是当天最重要的避暑安排。`,chips:[`完整避暑`],amapKeyword:`丹尼斯大卫天地 洛阳`},
-      {time:`20:00—21:10`,name:`应天门南广场 · 只看外观`,type:`spot`,city:`洛阳市`,lat:34.676987,lng:112.454631,desc:`轻量夜景点；不强买票、不绕城墙，天气差或到店晚就删。`,chips:[`可选`,`夜间短走`],detail:`只在南广场看亮灯和建筑外观。若想临时入馆，先用官方/地图核对当天售检票截止；不要为了入馆排队。`,amapKeyword:`应天门南广场`,xhsKeyword:`洛阳 应天门 夜景 人流`},
-      {time:`21:30—22:40`,name:`醇享酒匠 Cocktail & Cigar`,type:`drink`,city:`洛阳市`,lat:34.673060,lng:112.415829,desc:`高层城市夜景；问“花园”或“黄瓜”特调，或另点无酒精花果香特调。`,chips:[`可选`,`一杯即走`,`19:30后`],detail:`近期公开内容提到花园、黄瓜两款特调以及另外的无酒精花果香饮品；平台当前展示 19:30—01:30。约距酒店 1 km，酒后打车。`,amapKeyword:`醇享酒匠 Cocktail Cigar 洛阳`,xhsKeyword:`洛阳 醇享酒匠 特调`,dianpingKeyword:`洛阳 醇享酒匠`,source:`https://hk.trip.com/restaurant/china/luoyang/detail/enjoy-bar-129884944/?locale=zh-HK`}
+      {time:`17:30—20:30`,name:`丹尼斯大卫天地 · 室内避暑`,type:`rest`,city:`洛阳市`,lat:34.668835,lng:112.425534,desc:`留在商场吹空调、补水、看电影或坐咖啡馆；不回酒店，也不在傍晚暴晒赶景点。`,chips:[`完整避暑`,`不折返酒店`],amapKeyword:`丹尼斯大卫天地 洛阳`},
+      {time:`20:45—22:00`,name:`醇享酒匠 Cocktail & Cigar`,type:`drink`,city:`洛阳市`,lat:34.673060,lng:112.415829,desc:`高层城市夜景；问“花园”或“黄瓜”特调，或另点无酒精花果香特调。`,chips:[`可选`,`一杯即走`,`19:30后`],detail:`近期公开内容提到花园、黄瓜两款特调以及另外的无酒精花果香饮品；平台当前展示 19:30—01:30。约距酒店 1 km，酒后打车；应天门和丽景门已合并到 7 月 27 日，不在抵达日重复赶路。`,amapKeyword:`醇享酒匠 Cocktail Cigar 洛阳`,xhsKeyword:`洛阳 醇享酒匠 特调`,dianpingKeyword:`洛阳 醇享酒匠`,source:`https://hk.trip.com/restaurant/china/luoyang/detail/enjoy-bar-129884944/?locale=zh-HK`}
     ]
   },
   {
-    id:2,label:`7/25 龙门`,date:`7 月 25 日 · 周六`,title:`午后休息，夜游龙门石窟`,subtitle:`用夜游换掉正午暴晒；只走西山主线，香山寺按体力决定。`,color:`#d28d55`,hotelCity:`洛阳市`,
-    route:`付记午餐 → 酒店午休 → 打车到西北服务区 → 电瓶车接驳 → 西山石窟 → 香山寺可删 → 打车返酒店`,
+    id:2,label:`7/25 龙门`,date:`7 月 25 日 · 周六`,title:`商场避暑，夜游龙门石窟`,subtitle:`午餐后留在室内，不折返酒店；龙门只走西山主线，香山寺按体力决定。`,color:`#d28d55`,hotelCity:`洛阳市`,
+    route:`付记午餐 → 丹尼斯大卫天地休息 → 打车到西北服务区 → 电瓶车接驳 → 西山石窟 → 香山寺可删 → 行程结束返酒店`,
     locations:[
       {time:`12:10—13:00`,name:`付记老城糊涂面浆面条馆`,type:`food`,city:`洛阳市`,lat:34.674171,lng:112.425598,desc:`距酒店约 600 m；小份尝浆面条/糊涂面，午市当前到 14:00。`,chips:[`非网红小店`,`准时到`],detail:`平台当前展示 11:00—14:00、17:00—20:30。公开样本不多，反而更符合“不排很久”；但营业窗口窄，出发前地图复核。`,amapKeyword:`付记老城糊涂面浆面条馆 唐宫西路店`,xhsKeyword:`洛阳 付记 糊涂面 浆面条`,dianpingKeyword:`洛阳 付记糊涂面浆面条`,source:`https://gs.ctrip.com/html5/you/foods/fooddetail/198/7407648.html`},
-      {time:`13:10—15:30`,name:`酒店午休`,type:`rest`,city:`洛阳市`,lat:34.668835,lng:112.425534,desc:`补水、换防滑鞋；不在午后增加任何户外点。`,chips:[`避暑核心`],amapKeyword:`伊水源酒店 洛阳`},
+      {time:`13:10—15:30`,name:`丹尼斯大卫天地 · 坐着休息`,type:`rest`,city:`洛阳市`,lat:34.668835,lng:112.425534,desc:`午餐后步行到商场，咖啡馆/影院内休息；鞋和雨具在出门前带齐，不回酒店拿东西。`,chips:[`避暑核心`,`不折返酒店`],amapKeyword:`丹尼斯大卫天地 洛阳`},
       {time:`15:50—20:50`,name:`龙门石窟夜游`,type:`spot`,city:`洛阳市`,lat:34.560379,lng:112.471873,desc:`16:40 前后到服务区休息；18:00 检票，西山石窟主线到 20:50。`,chips:[`需实名预约`,`夜游限定`,`雨天防滑`],detail:`当前夜游售票 17:30—19:30、检票 18:00—20:00、21:00 清场；只开放西山石窟和香山寺，东山、白园不开放。服务区到检票区可坐 10 元单程电瓶车，省约 20 分钟步行；洞窟栈道和台阶仍需自己走。腿累就删香山寺，雷电/强降雨则与 7/26 晚互换或取消。`,amapKeyword:`龙门石窟西北服务区`,xhsKeyword:`龙门石窟 夜游 2026 台阶`,reserve:`https://www.lmsk.cn/Pwxx_id_4.html`,source:`https://www.lmsk.cn/Pwxx_id_1.html`},
       {time:`21:00 后`,name:`打车返回酒店`,type:`transport`,city:`洛阳市`,lat:34.668835,lng:112.425534,desc:`周末/雨天叫车留弹性；游船受水位与天气影响，不列为必做。`,chips:[`不追游船`],amapKeyword:`伊水源酒店 洛阳`}
     ]
   },
   {
-    id:3,label:`7/26 洛邑`,date:`7 月 26 日 · 周日`,title:`一碗汤、一桌水席，夜走洛邑古城`,subtitle:`把吃饭卡在非峰值，白天完整回酒店休息。`,color:`#287271`,hotelCity:`洛阳市`,
-    route:`南关牛肉汤 → 酒店午休 → 纱厂路水席 → 洛邑古城 → 十字街找牡丹芳华（可删）`,
+    id:3,label:`7/26 古墓+洛邑`,date:`7 月 26 日 · 周日`,title:`古墓博物馆避暑，夜走洛邑古城`,subtitle:`古墓博物馆周一闭馆，必须放在今天；午后室内、晚间老城，全程不回酒店。`,color:`#287271`,hotelCity:`洛阳市`,
+    route:`南关牛肉汤 → 洛阳古墓博物馆 → 老城水席 → 洛邑古城 → 十字街找牡丹芳华（可删） → 行程结束返酒店`,
     locations:[
       {time:`12:10—13:05`,name:`河洛郑波·南关小碗牛肉汤（总店）`,type:`food`,city:`洛阳市`,lat:34.677475,lng:112.477257,desc:`牛肉汤 + 油旋/饼丝；可在同店补海碧或涮牛肚。`,chips:[`晚起友好`,`全天汤馆`,`排队≤20分`],detail:`平台当前展示 05:30—22:30，是最适合午起的洛阳汤馆。饭点可能慢或拼桌；若队伍明显超过 20 分钟，直接删掉或就近吃清淡简餐，不在原地继续耗。`,amapKeyword:`河洛郑波 南关小碗牛肉汤 总店`,xhsKeyword:`洛阳 南关小碗牛肉汤 总店`,dianpingKeyword:`洛阳 南关小碗牛肉汤`,source:`https://gs.ctrip.com/html5/you/foods/fooddetail/198/7412381.html`},
-      {time:`13:10—16:10`,name:`酒店午休`,type:`rest`,city:`洛阳市`,lat:34.668835,lng:112.425534,desc:`周日下午最高温时段完全留空。`,chips:[`避暑核心`],amapKeyword:`伊水源酒店 洛阳`},
-      {time:`16:30—18:00`,name:`老雒阳面馆·水席（纱厂路店）`,type:`food`,city:`洛阳市`,lat:34.675697,lng:112.423123,desc:`晚市刚开门去；两人点牡丹燕菜 + 连汤肉片/焦炸丸子二选一 + 主食。`,chips:[`水席主选`,`16:30错峰`],detail:`不点 24 道全席，避免酸辣胡椒味过度集中，也给晚间留体力。管记水席更网红且公开信号提示需早排，因此只作愿意排队时的备选，不放主线。`,amapKeyword:`老雒阳面馆 水席 纱厂路店`,xhsKeyword:`洛阳 老雒阳面馆 水席 纱厂路`,dianpingKeyword:`洛阳 老雒阳面馆 水席 纱厂路`,source:`https://www.trip.com/restaurant/china/luoyang/detail/restaurant-36657945/`},
-      {time:`19:30—21:10`,name:`洛邑古城 · 90 分钟短环线`,type:`spot`,city:`洛阳市`,lat:34.681580,lng:112.479540,desc:`文峰塔、水景和核心街区；人太密就沿外围拍照后撤。`,chips:[`免费预约`,`夜间短走`,`拥挤即撤`],detail:`暑期可能延时开放，但各公开口径存在差异；用当天官微为准。建议实名预约并带身份证。雷电时不在塔下、河岸和开阔区域停留。`,amapKeyword:`洛邑古城`,xhsKeyword:`洛邑古城 夜游 人流 2026`,reserve:`https://www.luoyangmudan.cn/t/965`,source:`https://www.luoyangmudan.cn/t/965`},
-      {time:`21:10—21:50`,name:`老城十字街 · 找牡丹芳华`,type:`food`,city:`洛阳市`,lat:34.682428,lng:112.472997,desc:`只核到“牡丹芳华奶茶”在十字街的街区线索；现场认招牌，找不到就不折返。`,chips:[`可选`,`门牌不稳定`],detail:`这不是已核实的固定门店坐标，地图点是十字街街区。不要为了一个不稳定摊位逆向走回去。胡辣汤、豆腐汤多为早餐档，本次也不单独牺牲睡眠；老君山早起日集合点附近若恰有营业，可外带二选一。`,amapKeyword:`洛阳老街十字街 牡丹芳华`,xhsKeyword:`洛阳 牡丹芳华 奶茶 十字街`,dianpingKeyword:`洛阳 牡丹芳华 奶茶`}
+      {time:`13:35—16:40`,name:`洛阳古墓博物馆（河南古代壁画馆）`,type:`spot`,city:`洛阳市`,lat:34.741011,lng:112.439679,desc:`免费实名预约；典型墓葬、壁画馆、北魏帝陵按体力取舍，16:40 前离馆。`,chips:[`需实名预约`,`周一闭馆`,`室内避暑`],detail:`官方夏季口径为 09:00—17:00、16:30 停止入馆，周一闭馆（法定节假日除外），所以安排在周日。建议前一晚从官方公众号/官网预约，预留 2.5—3 小时；展厅含下沉空间和少量台阶，穿防滑鞋。咨询 0379-62265740。`,amapKeyword:`洛阳古墓博物馆 河南古代壁画馆`,xhsKeyword:`洛阳古墓博物馆 参观路线`,reserve:`https://pw.gumumuseum.cn/`,source:`https://www.gumumuseum.cn/guide/`},
+      {time:`17:20—18:40`,name:`老雒阳面馆·水席（老城店）`,type:`food`,city:`洛阳市`,lat:34.681890,lng:112.470560,desc:`从博物馆打车到老城；两人点牡丹燕菜 + 连汤肉片/焦炸丸子二选一 + 主食。`,chips:[`水席主选`,`错峰早晚餐`],detail:`不点 24 道全席，避免酸辣胡椒味过度集中，也给晚间留体力。到店若等位超过 20 分钟，就在老城同区域换一家坐席型水席馆，不为名店硬排。`,amapKeyword:`老雒阳面馆 老城店 洛阳`,xhsKeyword:`洛阳 老雒阳面馆 老城店 水席`,dianpingKeyword:`洛阳 老雒阳面馆 老城店`,source:`https://tw.trip.com/restaurant/china/luoyang/detail/restaurant-18003790`},
+      {time:`19:10—21:00`,name:`洛邑古城 · 轻量短环线`,type:`spot`,city:`洛阳市`,lat:34.681580,lng:112.479540,desc:`文峰塔、水景和核心街区；人太密就沿外围拍照后撤。`,chips:[`免费预约`,`夜间短走`,`拥挤即撤`],detail:`暑期可能延时开放，但各公开口径存在差异；用当天官微为准。建议实名预约并带身份证。雷电时不在塔下、河岸和开阔区域停留。`,amapKeyword:`洛邑古城`,xhsKeyword:`洛邑古城 夜游 人流 2026`,reserve:`https://www.luoyangmudan.cn/t/965`,source:`https://www.luoyangmudan.cn/t/965`},
+      {time:`21:00—21:40`,name:`老城十字街 · 找牡丹芳华`,type:`food`,city:`洛阳市`,lat:34.682428,lng:112.472997,desc:`只核到“牡丹芳华奶茶”在十字街的街区线索；现场认招牌，找不到就不折返。`,chips:[`可选`,`门牌不稳定`],detail:`这不是已核实的固定门店坐标，地图点是十字街街区。不要为了一个不稳定摊位逆向走回去。胡辣汤、豆腐汤多为早餐档，本次不单独牺牲睡眠。`,amapKeyword:`洛阳老街十字街 牡丹芳华`,xhsKeyword:`洛阳 牡丹芳华 奶茶 十字街`,dianpingKeyword:`洛阳 牡丹芳华 奶茶`}
     ]
   },
   {
-    id:4,label:`7/27 老君山`,date:`7 月 27 日 · 周一`,title:`双索道低体力版，唯一早起日`,subtitle:`先看天气再决定是否出发；双索道仍不等于无台阶。`,color:`#4d7c56`,hotelCity:`洛阳市`,
-    route:`06:15 酒店 → 票务中心/游客中心 → 景交 → 一级索道 → 二级索道 → 云景天路/十里画屏 → 金顶按体力 → 16:30 前下山 → 返洛`,
+    id:4,label:`7/27 城门`,date:`7 月 27 日 · 周一`,title:`天子驾六、应天门与丽景门`,subtitle:`老君山已取消；最热时段看室内展，入夜后把两座城门和特产采购串成一条线。`,color:`#4d7c56`,hotelCity:`洛阳市`,
+    route:`酒店出门 → 丹尼斯简餐/补给 → 天子驾六 → 地铁 1 站到应天门 → 洛阳礼物 → 地铁 1 站到丽景门 → 三彩/特产 → 老城夜走 → 行程结束返酒店`,
     locations:[
-      {time:`06:15 左右`,name:`酒店集合出发`,type:`transport`,city:`洛阳市`,lat:34.668835,lng:112.425534,desc:`优先有资质的一日游/拼车；确认市区接送、门票、景交、两级索道包含范围。`,chips:[`唯一早起`,`身份证原件`],amapKeyword:`伊水源酒店 洛阳`},
-      {time:`09:00—10:30`,name:`老君山票务中心 / 双索道`,type:`spot`,city:`洛阳市`,lat:33.740809,lng:111.651912,desc:`核验实名预约后坐景交；一级索道和二级峰林索道都坐。`,chips:[`7/20开约`,`雷雨即取消`,`16:00停上行`],detail:`官方当前实行提前 7 天实名预约；7 月 27 日名额预计 7 月 20 日开放。一级索道夏秋上行 16:00 停止，徒步通道 15:30 后不再上行，恶劣天气会关闭。咨询 0379-66838888，救援 0379-66775268。`,amapKeyword:`老君山票务中心`,xhsKeyword:`老君山 双索道 低体力 雷雨`,reserve:`https://www.laojunshan.cn/nd.jsp?fromColId=2&id=2582`,source:`https://www.laojunshan.cn/nd.jsp?fromColId=2&id=2582`},
-      {time:`10:30—14:30`,name:`云景天路 / 十里画屏 → 金顶`,type:`spot`,city:`洛阳市`,lat:33.720310,lng:111.643530,desc:`双索道后仍有约 1.5—2 小时栈道和台阶；每 30—40 分钟休息。`,chips:[`仍有台阶`,`体感不适即折返`],detail:`想去金顶就必须接受实际步行；若胸闷、头晕、腿软或山上天气转差，在峰林索道上站看完云景天路后折返。不要用地图山峰坐标驾车，导航终点始终搜索票务中心/游客中心。`,amapKeyword:`老君山金顶道观群`,xhsKeyword:`老君山 十里画屏 金顶 台阶`},
-      {time:`14:30—16:30`,name:`双索道下山`,type:`transport`,city:`洛阳市`,lat:33.740809,lng:111.651912,desc:`不追 19:10 后亮灯；预计 17:00 集合返洛，20:00—21:00 回市区。`,chips:[`默认不等亮灯`,`留索道余量`],detail:`默认只执行 7 月 27 日。7 月 23—24 日若趋势明显恶化，只有在别日仍有官方余票、且能同步改掉龙门/洛邑预约时才整日互换；7 月 26 日晚若出现雷暴/大风预警、索道停运或步道关闭，任一项都直接取消。`,amapKeyword:`老君山景区出口`}
+      {time:`12:00—13:00`,name:`丹尼斯大卫天地 · 简餐与补给`,type:`rest`,city:`洛阳市`,lat:34.668835,lng:112.425534,desc:`从酒店一次性带齐物品后出门；在商场吃简餐、补水，食品特产留到晚间老城购买。`,chips:[`中午起步`,`不折返酒店`],amapKeyword:`丹尼斯大卫天地 洛阳`},
+      {time:`13:15—15:15`,name:`周王城天子驾六博物馆`,type:`spot`,city:`洛阳市`,lat:34.671533,lng:112.445881,desc:`周一开放的室内博物馆；看车马坑与东周王城遗迹，避开最热时段。`,chips:[`周一开放`,`室内避暑`,`收费馆`],detail:`市文物局备案开放时间为 08:30—18:30，门票约 30 元；以当天售票口为准。参观后从周王城广场站坐地铁 1 号线一站到应天门，避免在烈日下步行。`,amapKeyword:`周王城天子驾六博物馆`,source:`https://oss.ly.gov.cn/upload-file/files/20250117/8b8b8b59fef24026a790e4324075a93a.pdf`},
+      {time:`15:40—18:35`,name:`应天门遗址博物馆 + 洛阳礼物`,type:`spot`,city:`洛阳市`,lat:34.676987,lng:112.454631,desc:`先看室内遗址展，傍晚到广场看亮灯；在官方直营“洛阳礼物”买城市文创。`,chips:[`室内避暑`,`文创顺路买`,`亮灯当日为准`],detail:`2026 票务页展示 09:00—22:30、22:00 停止检票，建议至少提前 2 小时购票并以当天公告为准。文创优先选应天门/龙门图案冰箱贴、书签、盲盒；不在景区买大而易碎的摆件。`,amapKeyword:`隋唐洛阳城应天门遗址`,xhsKeyword:`洛阳 应天门 夜景 洛阳礼物`,reserve:`https://www.luoyangmudan.cn/t/928`,source:`https://www.henan.gov.cn/2025/05-04/3154412.html`},
+      {time:`18:40—19:00`,name:`地铁 1 号线：应天门 → 丽景门`,type:`transport`,city:`洛阳市`,lat:34.681411,lng:112.472009,desc:`只坐一站，省掉约 2 km 暑热步行；出站后再开始夜间 citywalk。`,chips:[`少走路`,`两城门串联`],amapKeyword:`丽景门地铁站`},
+      {time:`19:00—19:45`,name:`洛阳三彩艺术博物馆`,type:`spot`,city:`洛阳市`,lat:34.681675,lng:112.472963,desc:`丽景门瓮城内看三彩并挑小件文创；大件陶器易碎，本次不建议背。`,chips:[`全年开放`,`瓮城内`,`购买前确认营业`],detail:`市文物局备案夏季 08:30—22:00、全年开放，电话 0379-63980979；参观前电话或地图确认当日营业。优先小件三彩、纹样书签，不买没有作者/材质说明的高价摆件。`,amapKeyword:`洛阳三彩艺术博物馆 丽景门`,source:`https://www.mct.gov.cn/whzx/qgwhxxlb/hn/202303/t20230307_940259.htm`},
+      {time:`19:50—20:20`,name:`万景祥·洛阳名特产（九龙鼎店）`,type:`food`,city:`洛阳市`,lat:34.681740,lng:112.471902,desc:`只买密封、有生产日期的牡丹饼/酥、牡丹花茶、老八件；同款按净含量比价。`,chips:[`特产采购`,`不买散装`,`顺路`],detail:`若店休或排队超过 15 分钟就跳过；真空/罐装偃师银条可在正规特产店或大型商超补。易碎三彩与杜康酒不适合后续跨城拖行李。`,amapKeyword:`万景祥 洛阳名特产 九龙鼎店`,dianpingKeyword:`洛阳 万景祥 九龙鼎店`,source:`https://tw.trip.com/restaurant/china/luoyang/detail/mo-jing-xiang-te-chan-lao-ji-dian-25717802/`},
+      {time:`20:20—21:40`,name:`丽景门—西大街—十字街夜走`,type:`spot`,city:`洛阳市`,lat:34.682428,lng:112.472997,desc:`瓮城、西大街到十字街约 1—1.5 km，边走边补轻晚餐；拥挤就提前打车返程。`,chips:[`夜间 citywalk`,`只走单向`,`不折返`],detail:`不从应天门一路硬走过来，也不在老街反复找同一家店。食品和文创买完即收手，把重量控制在后续跨城能轻松携带的范围。`,amapKeyword:`洛阳丽景门 西大街 十字街`,xhsKeyword:`洛阳 丽景门 西大街 夜游`}
     ]
   },
   {
@@ -173,7 +176,7 @@ const DAYS = [
   },
   {
     id:6,label:`7/29 万岁山`,date:`7 月 29 日 · 周三`,title:`预约优先 14:00，避暑优先 16:00`,subtitle:`14:00 更利于约《三打》；若只把夜秀当核心，15:30—16:00 入园更符合避暑偏好。`,color:`#b94f6b`,hotelCity:`开封市`,
-    route:`书店街细米线 → 酒店拿装备 → 万岁山南门 → 入园核票 → 立刻约《三打》《打铁花》 → 遮阴小剧场 → 夜场 → 打车返酒店`,
+    route:`酒店出门前带齐装备 → 书店街细米线 → 万岁山南门 → 入园核票 → 立刻约《三打》《打铁花》 → 遮阴小剧场 → 夜场 → 行程结束返酒店`,
     locations:[
       {time:`12:00—12:45`,name:`小楼米线（书店街店）`,type:`food`,city:`开封市`,lat:34.8001362,lng:114.3504281,desc:`鸡汤底细米线，离酒店近；若关门就换三胜街田记。`,chips:[`顺路主选`,`营业待复核`],detail:`地址北书店街 54 号，电话 13460695229。当前营业时间未可靠核实；出发前地图确认，关门就不等。`,amapKeyword:`小楼米线 书店街店`,xhsKeyword:`开封 小楼米线 书店街`,dianpingKeyword:`开封 小楼米线 书店街`,source:`https://you.ctrip.com/food/kaifeng165/62679153.html`},
       {time:`14:00 / 16:00—23:00`,name:`万岁山武侠城`,type:`spot`,city:`开封市`,lat:34.8206500,lng:114.3442600,desc:`14:00 是预约优先版；若只重夜秀，15:30—16:00 入园更凉，但接受《三打》可能约满。`,chips:[`进园后预约`,`约满有退路`,`可提前退场`],detail:`当前票面开放 08:00—23:00、21:00 停止入园；节目单每天变化。核票后第一件事预约《三打祝家庄》和《沙场打铁花》。早到时固定在最近的有棚、有座区域，每 45—60 分钟坐下补水；有棚有座不等于有空调，仍闷热就原地休息或提前结束。任一大秀约满，就改看当日可预约夜场或就近街头演艺，不跨园追场；看完一场后可在 19:30 或 21:00 提前结束。`,amapKeyword:`万岁山武侠城 南门游客中心`,xhsKeyword:`万岁山武侠城 演出预约 打铁花 2026`,reserve:`https://wansuishan.com.cn/contact.html`,source:`https://you.ctrip.com/sight/kaifeng165/77323.html`},
@@ -181,13 +184,14 @@ const DAYS = [
     ]
   },
   {
-    id:7,label:`7/30 开封`,date:`7 月 30 日 · 周四`,title:`四味菜、室内避暑与老城夜走`,subtitle:`博物馆可被酒店午休一键替换；不为早售罄小吃牺牲睡眠。`,color:`#3978b8`,hotelCity:`开封市`,
-    route:`李记四味菜 → 博物馆或酒店午休（二选一） → 邢家锅贴/羊肉炕馍 → 酒店休息 → 鼓楼—书店街短环线 → 理想三旬`,
+    id:7,label:`7/30 开封`,date:`7 月 30 日 · 周四`,title:`四味菜、博物馆与老城夜走`,subtitle:`从酒店出门后不再折返；下午博物馆，傍晚在沿途商场坐着避暑。`,color:`#3978b8`,hotelCity:`开封市`,
+    route:`李记四味菜 → 开封市博物馆 → 邢家锅贴/羊肉炕馍 → 大商新玛特室内休息 → 鼓楼—书店街短环线 → 理想三旬 → 行程结束返酒店`,
     locations:[
       {time:`12:00—12:45`,name:`李记四味菜馆（书店街店）`,type:`food`,city:`开封市`,lat:34.7998535,lng:114.3503846,desc:`当前平台显示到 13:30；四味菜偏早餐，接受午时售罄风险。`,chips:[`排队≤15分`,`可能售罄`,`不硬等`],detail:`地址北书店街 59 号，电话 15194641302。若排队超过 15 分钟或已售罄，直接删掉，不跨城追赵家。`,amapKeyword:`李记四味菜馆 书店街店`,xhsKeyword:`开封 李记四味菜 书店街`,dianpingKeyword:`开封 李记四味菜`,source:`https://hk.trip.com/restaurant/china/kaifeng/detail/liji-siwei-restaurant-15800693/`},
-      {time:`13:40—15:30`,name:`开封市博物馆（可选）`,type:`spot`,city:`开封市`,lat:34.8044600,lng:114.2479800,desc:`全程打车，室内避暑；15:30 前离馆，不想跑远就直接回酒店午休。`,chips:[`可选`,`需预约`,`16:00停入馆`],detail:`周二至周日 09:00—17:00、16:00 停止入馆；2026-04-28 起使用官方预约小程序/官微入口。建议提前 1—3 天预约下午档。它离老城较远，因此被明确设为可替换，而不是硬任务。`,amapKeyword:`开封市博物馆 新馆`,reserve:`https://www.sina.cn/news/detail/5291280644969326.html`,source:`https://kf.bendibao.com/tour/20251225/23076.shtm`},
+      {time:`13:40—15:30`,name:`开封市博物馆`,type:`spot`,city:`开封市`,lat:34.8044600,lng:114.2479800,desc:`全程打车，室内避暑；15:30 前离馆，预约失败则改去沿途商场，不回酒店。`,chips:[`需预约`,`16:00停入馆`,`预约失败有替代`],detail:`周二至周日 09:00—17:00、16:00 停止入馆；2026-04-28 起使用官方预约小程序/官微入口。建议提前 1—3 天预约下午档。若预约失败，直接把室内休息提前，不再临时加户外大景点。`,amapKeyword:`开封市博物馆 新馆`,reserve:`https://www.sina.cn/news/detail/5291280644969326.html`,source:`https://kf.bendibao.com/tour/20251225/23076.shtm`},
       {time:`16:15—17:20`,name:`邢家锅贴老店（金明广场店）`,type:`food`,city:`开封市`,lat:34.8034059,lng:114.3027518,desc:`预留约 45 分钟从博物馆转场；点小份羊肉炕馍，可补杏仁茶或炒凉粉。`,chips:[`博物馆回程顺路`,`营业待复核`],detail:`平台菜单可见羊肉炕馍、传统灌汤包、杏仁茶和炒凉粉，但近期营业/排队信号不够强。出发前地图或电话复核：0371-23851333。`,amapKeyword:`邢家锅贴老店 金明广场店`,xhsKeyword:`开封 邢家锅贴 金明广场 羊肉炕馍`,dianpingKeyword:`开封 邢家锅贴 金明广场`,source:`https://you.ctrip.com/food/kaifeng165/151870249.html`},
-      {time:`19:45—21:10`,name:`鼓楼—马道街—北书店街—三胜街`,type:`spot`,city:`开封市`,lat:34.7989839,lng:114.3501600,desc:`总步行控制约 1.5—2 km；哪段太拥挤就折返。`,chips:[`夜间 citywalk`,`拥挤即折返`],amapKeyword:`开封北书店街`,xhsKeyword:`开封 鼓楼 书店街 夜游`},
+      {time:`17:30—19:25`,name:`大商新玛特（开封总店）· 室内休息`,type:`rest`,city:`开封市`,lat:34.799445,lng:114.330275,desc:`位于回老城方向；找咖啡馆/公共座椅休息、补水，天黑后再去鼓楼。`,chips:[`沿途避暑`,`不折返酒店`],amapKeyword:`大商新玛特 开封总店 西门大街388号`},
+      {time:`19:45—21:10`,name:`鼓楼—马道街—北书店街—三胜街`,type:`spot`,city:`开封市`,lat:34.7989839,lng:114.3501600,desc:`总步行控制约 1.5—2 km；哪段太拥挤就缩短，不为补漏折返。`,chips:[`夜间 citywalk`,`拥挤即缩短`],amapKeyword:`开封北书店街`,xhsKeyword:`开封 鼓楼 书店街 夜游`},
       {time:`21:20—22:40`,name:`理想三旬湖边酒馆·Cocktail`,type:`drink`,city:`开封市`,lat:34.8068927,lng:114.3495400,desc:`特色偏湖景、露台和驻唱；酒的特调评价分化，不把它包装成专业鸡尾酒朝圣。`,chips:[`可选`,`每日17:00后`,`一杯低酒精`],detail:`地址龙亭东路 22 号，电话 15736875993。公开页当前显示每日 17:00—03:00；想安静坐一楼/三楼，想听歌坐二楼，露台太热或有蚊就转室内。`,amapKeyword:`理想三旬湖边酒馆 Cocktail`,xhsKeyword:`开封 理想三旬 湖边酒馆`,dianpingKeyword:`开封 理想三旬湖边酒馆`,source:`https://maps.apple.com.cn/place?address=%E4%B8%AD%E5%9B%BD%E6%B2%B3%E5%8D%97%E7%9C%81%E5%BC%80%E5%B0%81%E5%B8%82%E9%BE%99%E4%BA%AD%E5%8C%BA%E9%BE%99%E4%BA%AD%E4%B8%9C%E8%B7%AF22%E5%8F%B7&coordinate=34.806097%2C114.355463&name=%E7%90%86%E6%83%B3%E4%B8%89%E6%97%AC%E6%B9%96%E8%BE%B9%E9%85%92%E9%A6%86%C2%B7Cocktail`},
       {time:`—`,name:`张记仁香斋双麻火烧 · 当天搜索`,type:`food`,city:`开封市`,lat:null,lng:null,desc:`只能核到东大寺门食品街的旧线索，缺 2026 精确门牌/营业；显示营业且不排队才顺手买。`,chips:[`未核实坐标`,`偏早餐`,`不专程`],detail:`与午起习惯天然冲突。不要把旧攻略当成现行门店信息；若地图当天无结果，本次接受错过。`,amapKeyword:`张记仁香斋双麻火烧 开封`,xhsKeyword:`开封 张记仁香斋 双麻火烧`,dianpingKeyword:`开封 双麻火烧`},
       {time:`—`,name:`老白烩面 · 待补原链接`,type:`food`,city:`开封市`,lat:null,lng:null,desc:`当前无法把店名、地址、仍营业三者闭环，可能是平台简称或店名已变；未放假坐标。`,chips:[`信息缺口`,`不编造`],detail:`如果有最初看到的短视频/小红书/点评分享链接或截图，可以再把准确门店补进地图。暂不拿“老海家”等其他店冒充。`,amapKeyword:`老白烩面 开封`,xhsKeyword:`开封 老白烩面`,dianpingKeyword:`开封 老白烩面`}
@@ -215,7 +219,8 @@ const LOCS={}; DAYS.forEach(d=>d.locations.forEach((l,i)=>LOCS[`${d.id}-${i}`]=l
 function esc(s){return String(s??``).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function amapUrl(loc){return `https://uri.amap.com/search?keyword=${encodeURIComponent(loc.amapKeyword||loc.name)}&city=${encodeURIComponent(loc.city||``)}&callnative=1`;}
 function xhsUrl(loc){return `https://www.xiaohongshu.com/search_result?keyword=${encodeURIComponent(loc.xhsKeyword||loc.name)}&source=web_explore_feed`;}
-function dpUrl(loc){return `https://m.dianping.com/searchshop?keyword=${encodeURIComponent(loc.dianpingKeyword||loc.name)}`;}
+function dpUrl(loc){const slug=loc.city===`洛阳市`?`luoyang`:loc.city===`开封市`?`kaifeng`:loc.city===`郑州市`?`zhengzhou`:``;return slug?`https://www.dianping.com/${slug}`:`https://www.dianping.com/`;}
+function copyDpKeyword(event,el){const keyword=el?.dataset?.keyword||``;if(!keyword)return;try{navigator.clipboard?.writeText(keyword);el.title=`店名已复制：${keyword}；进入点评后粘贴搜索`;}catch{}}
 function safeUrl(url){try{const parsed=new URL(url);return /^https?:$/.test(parsed.protocol)?parsed.href:``;}catch{return``;}}
 
 let map=null, layers=[];
@@ -259,7 +264,7 @@ function card(loc,dayId,index){
   const chips=(loc.chips||[]).map(c=>`<span class="chip ${chipClass(c)}">${esc(c)}</span>`).join(``);
   let links=`<button class="btn nav" type="button" onclick="openSheet('${key}')">⌁ 导航</button>`;
   if(loc.xhsKeyword)links+=`<a class="btn xhs" href="${esc(xhsUrl(loc))}" target="_blank" rel="noopener">小红书</a>`;
-  if(loc.dianpingKeyword||loc.type===`food`||loc.type===`drink`)links+=`<a class="btn dp" href="${esc(dpUrl(loc))}" target="_blank" rel="noopener">大众点评</a>`;
+  if(loc.dianpingKeyword||loc.type===`food`||loc.type===`drink`){const dpKeyword=loc.dianpingKeyword||`${loc.city||``} ${loc.name}`;links+=`<a class="btn dp" href="${esc(dpUrl(loc))}" target="_blank" rel="noopener" data-keyword="${esc(dpKeyword)}" onclick="copyDpKeyword(event,this)" title="复制店名并打开大众点评城市页">复制店名 · 点评</a>`;}
   const reserveUrl=safeUrl(loc.reserve);if(reserveUrl)links+=`<a class="btn reserve" href="${esc(reserveUrl)}" target="_blank" rel="noopener">预约/规则</a>`;
   const sourceUrl=safeUrl(loc.source);if(sourceUrl&&sourceUrl!==reserveUrl)links+=`<a class="btn source" href="${esc(sourceUrl)}" target="_blank" rel="noopener">核验来源</a>`;
   const details=loc.detail?`<button class="more-btn" type="button" onclick="toggleDetail(event,'detail-${key}')">展开执行细节 ↓</button><div class="details" id="detail-${key}">${esc(loc.detail)}</div>`:``;
@@ -273,16 +278,17 @@ function dayView(d){
   h+=`<div class="footer">坐标用于 Leaflet 行程示意；中国地图坐标体系存在偏移，实际导航按钮始终按中文地点关键词在高德中搜索。营业、演出、天气和排队均需临近复核。</div>`;return h;
 }
 function overview(){
-  return `<section class="hero"><div class="eyebrow">2026 · 中原暑夜线</div><h1>洛阳—开封—郑州<br>避暑、美食与夜游地图</h1><p>7 月 24—31 日 · 中午起步版。白天空调与打车，夜里再走；老君山是唯一早起日。</p><div class="hero-tags"><span class="hero-tag">排队 15—20 分钟封顶</span><span class="hero-tag">雷雨可删</span><span class="hero-tag">三城各一间清吧</span></div></section>
-  <div class="grid"><div class="panel"><div class="kicker">住宿</div><div class="value">洛阳 · 伊水源酒店<br>开封 · 锦上酒店</div></div><div class="panel"><div class="kicker">郑州短停</div><div class="value">15:00 抵站<br>21:30 前回站</div></div><div class="panel"><div class="kicker">唯一早起</div><div class="value">7/27 老君山<br>06:15 左右出发</div></div><div class="panel"><div class="kicker">默认交通</div><div class="value">市内地铁/网约车<br>景区接驳优先</div></div></div>
-  <div class="callout danger"><strong>今天就要处理：</strong>老君山 7 月 27 日名额预计 7 月 20 日开放，以官方购票页实际放号为准；龙门夜游、洛邑古城、万岁山门票也尽早完成。万岁山两场大秀必须当天先核票入园，再预约。</div>
-  <div class="callout cool"><strong>天气开关：</strong>截至 7 月 19 日，官方中期趋势显示高温、有雨；雷暴风险以短临预警和雷达为准。老君山默认只执行 7 月 27 日，7 月 26 日晚若有雷暴/大风预警、索道停运或步道关闭，任一项都直接取消。</div>
+  return `<section class="hero"><div class="eyebrow">2026 · 中原暑夜线</div><h1>洛阳—开封—郑州<br>避暑、美食与夜游地图</h1><p>7 月 24—31 日 · 中午起步版。白天空调与打车，夜里再走；每天离开酒店后不再中途折返。</p><div class="hero-tags"><span class="hero-tag">排队 15—20 分钟封顶</span><span class="hero-tag">全程不折返酒店</span><span class="hero-tag">三城各一间清吧</span></div></section>
+  <div class="grid"><div class="panel"><div class="kicker">住宿</div><div class="value">洛阳 · 伊水源酒店<br>开封 · 锦上酒店</div></div><div class="panel"><div class="kicker">郑州短停</div><div class="value">15:00 抵站<br>21:30 前回站</div></div><div class="panel"><div class="kicker">7/27 已调整</div><div class="value">取消老君山<br>城门与特产线</div></div><div class="panel"><div class="kicker">默认交通</div><div class="value">市内地铁/网约车<br>室内避暑优先</div></div></div>
+  <div class="callout danger"><strong>今天就要处理：</strong>洛阳古墓博物馆 7 月 27 日周一闭馆，已移到 7 月 26 日；请尽快从官方入口预约。龙门夜游、洛邑古城和万岁山门票也尽早完成；万岁山大秀须当天先核票入园，再预约。</div>
+  <div class="callout cool"><strong>单次出门规则：</strong>每一天都在酒店内先带齐防晒、雨具、水和充电宝；出门后用商场、博物馆、游客中心或咖啡馆避暑，直到当晚行程结束才回酒店。</div>
   <div class="callout"><strong>不排队策略：</strong>小街天府只在 15 点档小份试吃；开封夜市同品类邻摊替换；老蔡记等位超 20 分钟即外带或放弃。老白烩面、双麻火烧、牡丹芳华无法核到稳定现行门牌的部分，地图明确标了信息边界。</div>
   <div class="section-title">8 天总览</div><div class="day-list">${DAYS.slice(1).map(d=>`<button class="day-link" type="button" onclick="go(${d.id})"><span class="day-swatch" style="background:${d.color}"></span><span class="day-copy"><strong>${esc(d.label)} · ${esc(d.title)}</strong><span>${esc(d.route)}</span></span><span class="day-arrow">›</span></button>`).join(``)}</div>
   <div class="section-title">每城一间夜生活候选</div><div class="bar-grid"><div class="bar-card"><strong>洛阳 · 醇享酒匠</strong><span>高层景观；花园/黄瓜特调信号</span></div><div class="bar-card"><strong>开封 · 理想三旬</strong><span>湖景、露台、驻唱优先于酒单</span></div><div class="bar-card"><strong>郑州 · 蓉LOUNGE</strong><span>茶果底定制特调；赶车只喝一杯</span></div></div>
-  <div class="section-title">主动删减</div><div class="panel"><div class="value" style="font-size:13px;font-weight:650">不加入白马寺、清明上河园、开封府等新大景点；龙门夜游放弃东山/白园，老君山不等亮灯，万岁山不追全节目单。开封博物馆可以被酒店午休直接替换。</div></div>
+  <div class="section-title">洛阳特产与周边怎么买</div><div class="grid"><div class="panel"><div class="kicker">食品首选</div><div class="value">真空/罐装偃师银条<br>牡丹鲜花饼、银丝酥、全花茶</div></div><div class="panel"><div class="kicker">文创首选</div><div class="value">应天门/龙门主题冰箱贴、书签<br>小件唐三彩</div></div><div class="panel"><div class="kicker">顺路店铺</div><div class="value">应天门 · 洛阳礼物<br>丽景门 · 万景祥 / 三彩艺术博物馆</div></div><div class="panel"><div class="kicker">避坑</div><div class="value">只买密封标日期食品<br>大件易碎三彩不背跨城</div></div></div>
+  <div class="section-title">主动删减</div><div class="panel"><div class="value" style="font-size:13px;font-weight:650">老君山已按你的新安排删除；不新增白马寺、清明上河园、开封府等户外大景点。龙门夜游放弃东山/白园，万岁山不追全节目单；博物馆预约失败时改去沿途商场，不回酒店补觉。</div></div>
   <div class="section-title">图例</div><div class="legend"><span><i style="background:var(--coral)"></i>餐饮</span><span><i style="background:#3978b8"></i>景点</span><span><i style="background:var(--purple)"></i>酒吧</span><span><i style="background:var(--gold)"></i>酒店</span><span><i style="background:var(--teal)"></i>休息</span></div>
-  <div class="footer">研究与坐标核验截至 2026-07-19。地图点为 WGS84 示意；导航使用中文 POI 搜索，避免坐标系偏移。所有第三方营业时间和排队信号均需出发前 24—48 小时复核。</div>`;
+  <div class="footer">研究与坐标核验更新至 2026-07-24。大众点评按钮会先复制店名，再打开对应城市的官方首页，避免失效搜索链接；进入后粘贴店名即可。地图点为 WGS84 示意，实际导航使用中文 POI 搜索。</div>`;
 }
 
 let current=0;
